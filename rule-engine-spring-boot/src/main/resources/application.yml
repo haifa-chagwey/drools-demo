@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: rule-engine
+  datasource:
+    url: jdbc:postgresql://localhost:5432/rule-engine
+    username: haifa
+    password: haifa
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create
+    database: PostgreSQL
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
