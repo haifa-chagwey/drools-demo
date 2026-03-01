@@ -10,6 +10,7 @@ import org.kie.internal.io.ResourceFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class RuleService {
@@ -37,10 +38,9 @@ public class RuleService {
 
         KieSession kieSession = kieContainer.newKieSession();
 
-        Map<String, Object> output = new java.util.HashMap<>();
+        Map<String, Object> output = new ConcurrentHashMap<>();
         kieSession.setGlobal("output", output);
         kieSession.insert(input);
-
         kieSession.fireAllRules();
         kieSession.dispose();
 
