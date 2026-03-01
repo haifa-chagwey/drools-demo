@@ -7,9 +7,13 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class DroolsConfig {
 
-//    Main Drools entry point
+//    private static final String drl_file_path = "rules/discount-rules.drl";
+
     @Bean
     public KieServices kieServices() {
         return KieServices.Factory.get();
     }
+
+
+
 }
