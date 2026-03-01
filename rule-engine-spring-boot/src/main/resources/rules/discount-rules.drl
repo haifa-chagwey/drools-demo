@@ -1,16 +1,14 @@
 package rules
 
-import com.haifachagwey.ruleengine.model.OrderRequest
-import com.haifachagwey.ruleengine.model.OrderDiscount
-
-global OrderDiscount orderDiscount;
+import java.util.Map
+global Map output
 
 rule "Discount for orders"
     when
-        $order : OrderRequest(age < 18)
+        $input : this["age"] < 18
     then
         double discount = 20;
-        orderDiscount.setDiscount(discount);
+        output.put("discount", discount);
         System.out.println("Applied 20% discount for order from customer under 18 years old.");
 end
 
