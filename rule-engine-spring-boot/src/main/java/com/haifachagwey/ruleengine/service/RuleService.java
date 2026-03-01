@@ -1,7 +1,5 @@
 package com.haifachagwey.ruleengine.service;
 
-import com.haifachagwey.ruleengine.model.OrderDiscount;
-import com.haifachagwey.ruleengine.model.OrderRequest;
 import org.kie.api.KieServices;
 import org.kie.api.builder.KieBuilder;
 import org.kie.api.builder.KieFileSystem;
@@ -11,17 +9,19 @@ import org.kie.api.runtime.KieSession;
 import org.kie.internal.io.ResourceFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+
 @Service
-public class OrderService {
+public class RuleService {
 
 
     private final KieServices kieServices;
 
-    public OrderService(KieServices kieServices) {
+    public RuleService(KieServices kieServices) {
         this.kieServices = kieServices;
     }
 
-    public OrderDiscount evaluate(OrderRequest orderRequest) {
+    public Map<String, Object> evaluate(Map<String, Object> input) {
 
         String drl_file_path = "rules/discount-rules.drl";
 
@@ -37,14 +37,14 @@ public class OrderService {
 
         KieSession kieSession = kieContainer.newKieSession();
 
-        OrderDiscount orderDiscount = new OrderDiscount();
-        kieSession.setGlobal("orderDiscount", orderDiscount);
-        kieSession.insert(orderRequest);
+        Map<String, Object> output = new java.util.HashMap<>();
+        kieSession.setGlobal("output", output);
+        kieSession.insert(input);
 
         kieSession.fireAllRules();
         kieSession.dispose();
 
-        return orderDiscount;
+        return output;
     }
 
 }
