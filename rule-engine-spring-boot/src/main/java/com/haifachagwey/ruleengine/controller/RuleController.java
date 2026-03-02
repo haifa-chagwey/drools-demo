@@ -1,12 +1,11 @@
 package com.haifachagwey.ruleengine.controller;
 
-import com.haifachagwey.ruleengine.model.Rule;
+import com.haifachagwey.ruleengine.model.RuleEntity;
 import com.haifachagwey.ruleengine.repository.RuleRepository;
 import com.haifachagwey.ruleengine.service.RuleService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:4200")
@@ -22,13 +21,13 @@ public class RuleController {
     }
 
     @GetMapping
-    public List<Rule> getAllRules() {
+    public List<RuleEntity> getAllRules() {
         return ruleRepository.findAll();
     }
 
     @PostMapping
-    public Rule addRule(@RequestBody Rule rule) {
-        Rule saved = ruleRepository.save(rule);
+    public RuleEntity addRule(@RequestBody RuleEntity ruleEntity) {
+        RuleEntity saved = ruleRepository.save(ruleEntity);
         ruleService.reloadRules();
         return saved;
     }

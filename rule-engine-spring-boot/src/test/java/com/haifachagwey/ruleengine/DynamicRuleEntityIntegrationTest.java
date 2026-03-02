@@ -1,6 +1,6 @@
 package com.haifachagwey.ruleengine;
 
-import com.haifachagwey.ruleengine.model.Rule;
+import com.haifachagwey.ruleengine.model.RuleEntity;
 import com.haifachagwey.ruleengine.repository.RuleRepository;
 import com.haifachagwey.ruleengine.service.RuleService;
 import org.junit.jupiter.api.Test;
@@ -13,7 +13,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
-public class DynamicRuleIntegrationTest {
+public class DynamicRuleEntityIntegrationTest {
 
     @Autowired
     private RuleService ruleService;
@@ -23,24 +23,15 @@ public class DynamicRuleIntegrationTest {
 
     @Test
     public void testDynamicRuleLoading() {
-        // 1. Define a new rule
-        String drl = "package rules;\n" +
-                "import java.util.Map;\n" +
-                "global java.util.Map output;\n" +
-                "rule \"Dynamic Discount\"\n" +
-                "when\n" +
-                "    $input : Map(this[\"type\"] == \"VIP\")\n" +
-                "then\n" +
-                "    output.put(\"discount\", 20);\n" +
-                "end";
-
-        Rule rule = Rule.builder()
+        // 1. Define a new rule using easy rules condition and action
+        RuleEntity ruleEntity = RuleEntity.builder()
                 .name("VIPDiscount")
-                .drl(drl)
+                .condition("type == \"VIP\"")
+                .action("output.put(\"discount\", 20);")
                 .build();
 
         // 2. Save it to DB
-        ruleRepository.save(rule);
+        ruleRepository.save(ruleEntity);
 
         // 3. Reload rules in the engine
         ruleService.reloadRules();
@@ -54,18 +45,8 @@ public class DynamicRuleIntegrationTest {
         assertEquals(20, output.get("discount"));
         
         // 5. Update the rule and verify again
-        String updatedDrl = "package rules;\n" +
-                "import java.util.Map;\n" +
-                "global java.util.Map output;\n" +
-                "rule \"Dynamic Discount\"\n" +
-                "when\n" +
-                "    $input : Map(this[\"type\"] == \"VIP\")\n" +
-                "then\n" +
-                "    output.put(\"discount\", 30);\n" +
-                "end";
-        
-        rule.setDrl(updatedDrl);
-        ruleRepository.save(rule);
+        ruleEntity.setAction("output.put(\"discount\", 30);");
+        ruleRepository.save(ruleEntity);
         ruleService.reloadRules();
         
         output = ruleService.executeRules(input);
