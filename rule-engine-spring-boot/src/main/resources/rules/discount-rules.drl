@@ -5,7 +5,8 @@ global Map output
 
 rule "Discount for orders"
     when
-        $input : this["age"] < 18
+         $input : Map()
+         eval($input.get("age") < 18 )
     then
         double discount = 20;
         output.put("discount", discount);
