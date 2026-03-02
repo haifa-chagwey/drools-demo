@@ -1,7 +1,5 @@
 package com.haifachagwey.ruleengine.controller;
 
-import com.haifachagwey.ruleengine.model.OrderDiscount;
-import com.haifachagwey.ruleengine.model.OrderRequest;
 import com.haifachagwey.ruleengine.service.RuleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
