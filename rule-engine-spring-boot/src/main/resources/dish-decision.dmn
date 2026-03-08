@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+             xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/"
+             xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:modeler="http://camunda.org/schema/modeler/1.0"
+             id="dishDecision" name="Dish Decision" namespace="http://camunda.org/schema/1.0/dmn"
+             exporter="Camunda Modeler" exporterVersion="5.0.0" modeler:executionPlatform="Camunda Cloud"
+             modeler:executionPlatformVersion="8.0.0">
+  <decision id="dish-decision" name="Dish Decision">
+    <decisionTable id="DecisionTable_1" hitPolicy="FIRST">
+      <input id="Input_1" label="Season">
+        <inputExpression id="InputExpression_1" typeRef="string">
+          <text>season</text>
+        </inputExpression>
+      </input>
+      <input id="Input_2" label="Guest Count">
+        <inputExpression id="InputExpression_2" typeRef="integer">
+          <text>guestCount</text>
+        </inputExpression>
+      </input>
+      <output id="Output_1" label="Dish" name="dish" typeRef="string"/>
+      <rule id="DecisionRule_1">
+        <inputEntry id="UnaryTests_1">
+          <text>"Spring"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_2">
+          <text>&lt;= 10</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1">
+          <text>"Pasta"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_2">
+        <inputEntry id="UnaryTests_3">
+          <text>"Spring"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_4">
+          <text>&gt; 10</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_2">
+          <text>"Pizza"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_3">
+        <inputEntry id="UnaryTests_5">
+          <text>"Summer"</text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_6">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_3">
+          <text>"Salad"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_4">
+        <inputEntry id="UnaryTests_7">
+          <text></text>
+        </inputEntry>
+        <inputEntry id="UnaryTests_8">
+          <text></text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_4">
+          <text>"Steak"</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram>
+      <dmndi:DMNShape dmnElementRef="dish-decision">
+        <dc:Bounds height="80" width="180" x="160" y="80"/>
+      </dmndi:DMNShape>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>

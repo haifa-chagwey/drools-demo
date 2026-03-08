@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+             xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/"
+             xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" id="beverageDecision" name="Beverage Decision"
+             namespace="http://camunda.org/schema/1.0/dmn" exporter="Camunda Modeler" exporterVersion="5.0.0">
+  <decision id="beverage-decision" name="Beverage Decision">
+    <decisionTable id="DecisionTable_2" hitPolicy="FIRST">
+      <input id="Input_3" label="Time of Day">
+        <inputExpression id="InputExpression_3" typeRef="string">
+          <text>timeOfDay</text>
+        </inputExpression>
+      </input>
+      <output id="Output_2" label="Beverage" name="beverage" typeRef="string"/>
+      <rule id="DecisionRule_5">
+        <inputEntry id="UnaryTests_9">
+          <text>"Morning"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_5">
+          <text>"Coffee"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_6">
+        <inputEntry id="UnaryTests_10">
+          <text>"Afternoon"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_6">
+          <text>"Tea"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_7">
+        <inputEntry id="UnaryTests_11">
+          <text>"Evening"</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_7">
+          <text>"Beer"</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram>
+      <dmndi:DMNShape dmnElementRef="beverage-decision">
+        <dc:Bounds height="80" width="180" x="160" y="80"/>
+      </dmndi:DMNShape>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>
