@@ -1,0 +1,47 @@
+<mxfile host="app.diagrams.net" modified="2026-03-09T12:00:00.000Z" agent="OpenAI" version="24.7.17">
+  <diagram id="tenant-rule-engine-diagram" name="Page-1">
+    <mxGraphModel dx="1280" dy="720" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="tenant" value="&lt;b&gt;Tenant&lt;/b&gt;&lt;hr/&gt;id : Integer (PK)&lt;br/&gt;tenantKey : String (UK)&lt;br/&gt;name : String&lt;br/&gt;status : String&lt;br/&gt;createdAt : LocalDateTime&lt;br/&gt;updatedAt : LocalDateTime" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;align=left;verticalAlign=top;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="80" y="140" width="260" height="180" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ruleset" value="&lt;b&gt;RuleSet&lt;/b&gt;&lt;hr/&gt;id : Integer (PK)&lt;br/&gt;tenantId : Integer (FK)&lt;br/&gt;ruleSetKey : String&lt;br/&gt;name : String&lt;br/&gt;description : String&lt;br/&gt;status : String&lt;br/&gt;version : Integer&lt;br/&gt;createdAt : LocalDateTime&lt;br/&gt;updatedAt : LocalDateTime" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=13;align=left;verticalAlign=top;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="430" y="120" width="290" height="220" as="geometry" />
+        </mxCell>
+
+        <mxCell id="rule" value="&lt;b&gt;Rule&lt;/b&gt;&lt;hr/&gt;id : Integer (PK)&lt;br/&gt;ruleSetId : Integer (FK)&lt;br/&gt;name : String&lt;br/&gt;description : String&lt;br/&gt;priority : Integer&lt;br/&gt;drl : Text&lt;br/&gt;condition : Text&lt;br/&gt;action : Text&lt;br/&gt;status : String&lt;br/&gt;createdBy : String&lt;br/&gt;modifiedBy : String&lt;br/&gt;createdAt : LocalDateTime&lt;br/&gt;updatedAt : LocalDateTime" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=13;align=left;verticalAlign=top;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="820" y="100" width="300" height="260" as="geometry" />
+        </mxCell>
+
+        <mxCell id="tenantConfig" value="&lt;b&gt;TenantConfig&lt;/b&gt;&lt;hr/&gt;id : Integer (PK)&lt;br/&gt;tenantId : Integer (FK)&lt;br/&gt;configKey : String&lt;br/&gt;configData : Text&lt;br/&gt;createdAt : LocalDateTime&lt;br/&gt;updatedAt : LocalDateTime" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;align=left;verticalAlign=top;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="90" y="420" width="280" height="180" as="geometry" />
+        </mxCell>
+
+        <mxCell id="noteRuleset" value="Unique: (tenantId, ruleSetKey)&lt;br/&gt;&lt;br/&gt;Examples:&lt;br/&gt;- pricing&lt;br/&gt;- contracts&lt;br/&gt;- validation&lt;br/&gt;- penalties" style="shape=note;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="450" y="390" width="210" height="140" as="geometry" />
+        </mxCell>
+
+        <mxCell id="noteRule" value="Unique: (ruleSetId, name)&lt;br/&gt;&lt;br/&gt;Rule can be stored as:&lt;br/&gt;- full DRL&lt;br/&gt;- condition + action" style="shape=note;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="860" y="390" width="220" height="120" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edgeTenantRuleSet" value="1 .. N owns" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;fontSize=12;" edge="1" parent="1" source="tenant" target="ruleset">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edgeRuleSetRule" value="1 .. N contains" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;fontSize=12;" edge="1" parent="1" source="ruleset" target="rule">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="edgeTenantConfig" value="1 .. N has" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;fontSize=12;" edge="1" parent="1" source="tenant" target="tenantConfig">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
