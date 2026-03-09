@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+             xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/"
+             xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:modeler="http://camunda.org/schema/modeler/1.0"
+             id="Definitions_1" name="Discount Rules" namespace="http://camunda.org/schema/1.0/dmn"
+             exporter="Camunda Modeler" exporterVersion="5.0.0" modeler:executionPlatform="Camunda Platform"
+             modeler:executionPlatformVersion="7.17.0">
+  <decision id="discount-rules" name="Discount Rules">
+    <decisionTable id="DecisionTable_1" hitPolicy="FIRST">
+      <input id="Input_1" label="Age">
+        <inputExpression id="InputExpression_1" typeRef="integer">
+          <text>age</text>
+        </inputExpression>
+      </input>
+      <output id="Output_1" label="Discount" name="discount" typeRef="double"/>
+      <rule id="DecisionRule_1">
+        <inputEntry id="UnaryTests_1">
+          <text>&lt; 18</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1">
+          <text>20.0</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_2">
+        <inputEntry id="UnaryTests_2">
+          <text>&gt;= 18</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_2">
+          <text>0.0</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram>
+      <dc:Bounds height="80" width="180" x="160" y="100"/>
+      <dmndi:DMNShape dmnElementRef="discount-rules">
+        <dc:Bounds height="80" width="180" x="160" y="80"/>
+      </dmndi:DMNShape>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>

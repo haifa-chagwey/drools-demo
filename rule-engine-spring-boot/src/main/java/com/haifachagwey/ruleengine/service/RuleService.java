@@ -1,50 +1,38 @@
 package com.haifachagwey.ruleengine.service;
-
-import org.kie.api.KieServices;
-import org.kie.api.builder.KieBuilder;
-import org.kie.api.builder.KieFileSystem;
-import org.kie.api.builder.KieModule;
-import org.kie.api.runtime.KieContainer;
-import org.kie.api.runtime.KieSession;
-import org.kie.internal.io.ResourceFactory;
+import org.camunda.bpm.dmn.engine.DmnDecision;
+import org.camunda.bpm.dmn.engine.DmnDecisionTableResult;
+import org.camunda.bpm.dmn.engine.DmnEngine;
+import org.camunda.bpm.dmn.engine.DmnEngineConfiguration;
+import org.camunda.bpm.engine.variable.VariableMap;
+import org.camunda.bpm.engine.variable.Variables;
 import org.springframework.stereotype.Service;
 
+import java.io.InputStream;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class RuleService {
 
+    private final DmnEngine dmnEngine;
 
-    private final KieServices kieServices;
-
-    public RuleService(KieServices kieServices) {
-        this.kieServices = kieServices;
+    public RuleService() {
+        this.dmnEngine = DmnEngineConfiguration.createDefaultDmnEngineConfiguration().buildEngine();
     }
 
     public Map<String, Object> evaluate(Map<String, Object> input) {
+        String dmnFilePath = "rules/discount-rules.dmn";
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(dmnFilePath);
 
-        String drl_file_path = "rules/discount-rules.drl";
+        if (inputStream == null) {
+            throw new RuntimeException("DMN file not found: " + dmnFilePath);
+        }
 
-        KieFileSystem kieFileSystem = kieServices.newKieFileSystem();
-        kieFileSystem.write(ResourceFactory.newClassPathResource(drl_file_path));
+        DmnDecision decision = dmnEngine.parseDecision("discount-rules", inputStream);
+        VariableMap variables = Variables.createVariables();
+        variables.putAll(input);
 
-        KieBuilder kieBuilder = kieServices.newKieBuilder(kieFileSystem);
-        kieBuilder.buildAll();
+        DmnDecisionTableResult result = dmnEngine.evaluateDecisionTable(decision, variables);
 
-        KieModule kieModule = kieBuilder.getKieModule();
-
-        KieContainer kieContainer = kieServices.newKieContainer(kieModule.getReleaseId());
-
-        KieSession kieSession = kieContainer.newKieSession();
-
-        Map<String, Object> output = new ConcurrentHashMap<>();
-        kieSession.setGlobal("output", output);
-        kieSession.insert(input);
-        kieSession.fireAllRules();
-        kieSession.dispose();
-
-        return output;
+        return result.getFirstResult().getEntryMap();
     }
-
 }

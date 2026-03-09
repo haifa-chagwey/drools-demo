@@ -17,6 +17,8 @@ public class RuleController {
 
     private final RuleService ruleService;
 
+
+
     @PostMapping("/evaluate")
     public ResponseEntity<Map<String, Object>> evaluate(@RequestBody Map<String, Object> input) {
         Map<String, Object> discount = ruleService.evaluate(input);
