@@ -1,7 +1,9 @@
 package com.haifachagwey.ruleengine.service;
 
 import com.haifachagwey.ruleengine.model.Rule;
+import com.haifachagwey.ruleengine.model.TenantConfig;
 import com.haifachagwey.ruleengine.repository.RuleRepository;
+import com.haifachagwey.ruleengine.repository.TenantConfigRepository;
 import jakarta.annotation.PostConstruct;
 import org.kie.api.KieServices;
 import org.kie.api.builder.KieBuilder;
@@ -10,19 +12,21 @@ import org.kie.api.builder.KieModule;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.springframework.stereotype.Service;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class RuleService {
 
     private final RuleRepository ruleRepository;
+    private final TenantConfigRepository tenantConfigRepository;
     private final KieServices kieServices;
     private KieContainer kieContainer;
 
-    public RuleService(RuleRepository ruleRepository, KieServices kieServices) {
+    public RuleService(RuleRepository ruleRepository, TenantConfigRepository tenantConfigRepository, KieServices kieServices) {
         this.ruleRepository = ruleRepository;
+        this.tenantConfigRepository = tenantConfigRepository;
         this.kieServices = kieServices;
     }
 
@@ -33,57 +37,50 @@ public class RuleService {
     }
 
     public synchronized void reloadRules() {
-
-//        Create KieFileSystem
-//        A virtual folder where you put .drl files before compiling them.
         KieFileSystem kieFileSystem = kieServices.newKieFileSystem();
-
         List<Rule> rules = ruleRepository.findAll();
 
         for (Rule rule : rules) {
             String drlContent = "";
-            if (rule.getDrl() != null && !rule.getDrl().isEmpty()) {
-                drlContent = rule.getDrl();
-            } else if (rule.getCondition() != null && rule.getAction() != null) {
-                // Construct DRL from condition and action if DRL is missing
-                drlContent = "package rules;\n" +
-                        "import java.util.Map;\n" +
-                        "global java.util.Map output;\n" +
-                        "rule \"" + rule.getName() + "\"\n" +
-                        "when\n" +
-                        "    $input : Map(" + rule.getCondition() + ")\n" +
-                        "then\n" +
-                        "    " + rule.getAction() + "\n" +
-                        "end";
+                if (rule.getCondition() != null && rule.getAction() != null) {
+                drlContent = String.format(
+                    "package rules;\nimport java.util.Map;\nglobal java.util.Map output;\nglobal java.util.Map tenantConfigs;\nrule \"%s\"\nwhen\n    $input : Map(%s)\nthen\n    %s\nend",
+                    rule.getName(), rule.getCondition(), rule.getAction()
+                );
             }
 
             if (!drlContent.isEmpty()) {
+                System.out.println("drlContent: " + drlContent);
                 kieFileSystem.write("src/main/resources/rules/" + rule.getName() + ".drl", drlContent);
             }
         }
 
-//        Compile all DRL files
-        KieBuilder kieBuilder = kieServices.newKieBuilder(kieFileSystem);
-        kieBuilder.buildAll();
-
-//        Check errors (Syntax errors)
+        KieBuilder kieBuilder = kieServices.newKieBuilder(kieFileSystem).buildAll();
         if (kieBuilder.getResults().hasMessages(org.kie.api.builder.Message.Level.ERROR)) {
             throw new RuntimeException("Build Errors:\n" + kieBuilder.getResults().toString());
         }
-//        Create KieContainer
-//        When rules are compiled → they go inside KieContainer
-//        When executing rules → you create sessions from this container
-        KieModule kieModule = kieBuilder.getKieModule();
-        this.kieContainer = kieServices.newKieContainer(kieModule.getReleaseId());
+        this.kieContainer = kieServices.newKieContainer(kieBuilder.getKieModule().getReleaseId());
     }
 
-    public Map<String, Object> executeRules(Map<String, Object> input) {
-        if (kieContainer == null) {
-            reloadRules();
-        }
+//    public Map<String, Object> executeRules(Map<String, Object> input) {
+//        return executeRules(input, null);
+//    }
+
+    public Map<String, Object> executeRules(Map<String, Object> input, String tenantId) {
         KieSession kieSession = kieContainer.newKieSession();
-        Map<String, Object> output = new ConcurrentHashMap<>();
+        Map<String, Object> output = new HashMap<>();
+        Map<String, Object> mergedConfigs = new HashMap<>();
+
+        tenantConfigRepository.findByTenantId("GLOBAL")
+                .forEach(c -> mergedConfigs.put(c.getConfigKey(), c.getConfigValue()));
+
+        if (tenantId != null && !"GLOBAL".equals(tenantId)) {
+            tenantConfigRepository.findByTenantId(tenantId)
+                    .forEach(c -> mergedConfigs.put(c.getConfigKey(), c.getConfigValue()));
+        }
+
         kieSession.setGlobal("output", output);
+        kieSession.setGlobal("tenantConfigs", mergedConfigs);
         kieSession.insert(input);
         kieSession.fireAllRules();
         kieSession.dispose();

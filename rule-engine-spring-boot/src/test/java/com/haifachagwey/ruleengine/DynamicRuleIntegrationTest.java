@@ -24,19 +24,23 @@ public class DynamicRuleIntegrationTest {
     @Test
     public void testDynamicRuleLoading() {
         // 1. Define a new rule
-        String drl = "package rules;\n" +
-                "import java.util.Map;\n" +
-                "global java.util.Map output;\n" +
-                "rule \"Dynamic Discount\"\n" +
-                "when\n" +
-                "    $input : Map(this[\"type\"] == \"VIP\")\n" +
-                "then\n" +
-                "    output.put(\"discount\", 20);\n" +
-                "end";
+//        String drl = "package rules;\n" +
+//                "import java.util.Map;\n" +
+//                "global java.util.Map output;\n" +
+//                "rule \"Dynamic Discount\"\n" +
+//                "when\n" +
+//                "    $input : Map(this[\"type\"] == \"VIP\")\n" +
+//                "then\n" +
+//                "    output.put(\"discount\", 20);\n" +
+//                "end";
+        String condition = "this[\"type\"] == \"VIP\"";
+        String action = "output.put(\"discount\", 20);";
 
         Rule rule = Rule.builder()
                 .name("VIPDiscount")
-                .drl(drl)
+//                .drl(drl)
+                .condition(condition)
+                .action(action)
                 .build();
 
         // 2. Save it to DB
@@ -54,17 +58,21 @@ public class DynamicRuleIntegrationTest {
         assertEquals(20, output.get("discount"));
         
         // 5. Update the rule and verify again
-        String updatedDrl = "package rules;\n" +
-                "import java.util.Map;\n" +
-                "global java.util.Map output;\n" +
-                "rule \"Dynamic Discount\"\n" +
-                "when\n" +
-                "    $input : Map(this[\"type\"] == \"VIP\")\n" +
-                "then\n" +
-                "    output.put(\"discount\", 30);\n" +
-                "end";
+//        String updatedDrl = "package rules;\n" +
+//                "import java.util.Map;\n" +
+//                "global java.util.Map output;\n" +
+//                "rule \"Dynamic Discount\"\n" +
+//                "when\n" +
+//                "    $input : Map(this[\"type\"] == \"VIP\")\n" +
+//                "then\n" +
+//                "    output.put(\"discount\", 30);\n" +
+//                "end";
+        String updatedCondition = "this[\"type\"] == \"VIP\"";
+        String updatedAction = "output.put(\"discount\", 30);";
         
-        rule.setDrl(updatedDrl);
+//        rule.setDrl(updatedDrl);
+        rule.setCondition(updatedCondition);
+        rule.setAction(updatedAction);
         ruleRepository.save(rule);
         ruleService.reloadRules();
         

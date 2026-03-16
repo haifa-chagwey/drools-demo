@@ -16,9 +16,8 @@ public class RuleExecutionController {
         this.ruleService = ruleService;
     }
 
-    @PostMapping("/{ruleSetKey}")
-    public Map<String, Object> execute(@PathVariable String ruleSetKey, @RequestBody Map<String, Object> input) {
-        // For now, ruleSetKey is ignored as we use a single global KieContainer
-        return ruleService.executeRules(input);
+    @PostMapping("/{tenantId}")
+    public Map<String, Object> execute(@PathVariable String tenantId, @RequestBody Map<String, Object> input) {
+        return ruleService.executeRules(input, tenantId);
     }
 }
