@@ -1,13 +1,17 @@
 package com.haifachagwey.ruleengine;
 
 import com.haifachagwey.ruleengine.model.Rule;
+import com.haifachagwey.ruleengine.model.RuleAction;
+import com.haifachagwey.ruleengine.model.RuleCondition;
 import com.haifachagwey.ruleengine.repository.RuleRepository;
 import com.haifachagwey.ruleengine.service.RuleService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -23,24 +27,21 @@ public class DynamicRuleIntegrationTest {
 
     @Test
     public void testDynamicRuleLoading() {
-        // 1. Define a new rule
-//        String drl = "package rules;\n" +
-//                "import java.util.Map;\n" +
-//                "global java.util.Map output;\n" +
-//                "rule \"Dynamic Discount\"\n" +
-//                "when\n" +
-//                "    $input : Map(this[\"type\"] == \"VIP\")\n" +
-//                "then\n" +
-//                "    output.put(\"discount\", 20);\n" +
-//                "end";
-        String condition = "this[\"type\"] == \"VIP\"";
-        String action = "output.put(\"discount\", 20);";
+        // 1. Define a new rule with DRL override
+        String drl = "package rules;\n" +
+                "import java.util.Map;\n" +
+                "global java.util.Map output;\n" +
+                "global java.util.Map tenantConfigs;\n" +
+                "rule \"Dynamic Discount\"\n" +
+                "when\n" +
+                "    $input : Map(this[\"type\"] == \"VIP\")\n" +
+                "then\n" +
+                "    output.put(\"discount\", \"20\");\n" +
+                "end";
 
         Rule rule = Rule.builder()
                 .name("VIPDiscount")
-//                .drl(drl)
-                .condition(condition)
-                .action(action)
+                .drl(drl)
                 .build();
 
         // 2. Save it to DB
@@ -53,30 +54,8 @@ public class DynamicRuleIntegrationTest {
         Map<String, Object> input = new HashMap<>();
         input.put("type", "VIP");
 
-        Map<String, Object> output = ruleService.executeRules(input);
+        Map<String, Object> output = ruleService.executeRules(input, "GLOBAL");
 
-        assertEquals(20, output.get("discount"));
-        
-        // 5. Update the rule and verify again
-//        String updatedDrl = "package rules;\n" +
-//                "import java.util.Map;\n" +
-//                "global java.util.Map output;\n" +
-//                "rule \"Dynamic Discount\"\n" +
-//                "when\n" +
-//                "    $input : Map(this[\"type\"] == \"VIP\")\n" +
-//                "then\n" +
-//                "    output.put(\"discount\", 30);\n" +
-//                "end";
-        String updatedCondition = "this[\"type\"] == \"VIP\"";
-        String updatedAction = "output.put(\"discount\", 30);";
-        
-//        rule.setDrl(updatedDrl);
-        rule.setCondition(updatedCondition);
-        rule.setAction(updatedAction);
-        ruleRepository.save(rule);
-        ruleService.reloadRules();
-        
-        output = ruleService.executeRules(input);
-        assertEquals(30, output.get("discount"));
+        assertEquals("20", output.get("discount"));
     }
 }

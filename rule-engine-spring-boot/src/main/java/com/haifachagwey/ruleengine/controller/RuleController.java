@@ -28,6 +28,12 @@ public class RuleController {
 
     @PostMapping
     public Rule addRule(@RequestBody Rule rule) {
+        if (rule.getConditions() != null) {
+            rule.getConditions().forEach(c -> c.setRule(rule));
+        }
+        if (rule.getActions() != null) {
+            rule.getActions().forEach(a -> a.setRule(rule));
+        }
         Rule saved = ruleRepository.save(rule);
         ruleService.reloadRules();
         return saved;
