@@ -23,9 +23,6 @@ public class Rule {
     private String name;
     private String description;
 
-    @Column(columnDefinition = "TEXT")
-    private String drl;
-
     @OneToMany(mappedBy = "rule", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonManagedReference
     private List<RuleCondition> conditions;

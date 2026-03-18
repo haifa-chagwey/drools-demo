@@ -58,16 +58,6 @@ public class RuleService {
     }
 
     private String generateDrl(Rule rule) {
-        if (rule.getDrl() != null && !rule.getDrl().isEmpty()) {
-            String drl = rule.getDrl();
-            if (!drl.contains("global java.util.Map tenantConfigs;")) {
-                drl = drl.contains("package")
-                        ? drl.replaceFirst("(?m)^package\\s+.*\\s*;", "$0\nglobal java.util.Map tenantConfigs;")
-                        : "global java.util.Map tenantConfigs;\n" + drl;
-            }
-            return drl;
-        }
-
         if (rule.getConditions() == null || rule.getConditions().isEmpty() ||
             rule.getActions() == null || rule.getActions().isEmpty()) {
             return null;
@@ -78,6 +68,8 @@ public class RuleService {
         drl.append("import java.util.Map;\n");
         drl.append("global java.util.Map output;\n");
         drl.append("global java.util.Map tenantConfigs;\n\n");
+
+
         drl.append(String.format("rule \"%s\"\n", rule.getName()));
         drl.append("when\n");
         
@@ -96,11 +88,12 @@ public class RuleService {
         drl.append("then\n");
         
         for (RuleAction action : rule.getActions()) {
-            drl.append(String.format("    output.put(\"%s\", \"%s\");\n", 
+            drl.append(String.format("    output.put(\"%s\", \"%s\");\n",
                     action.getOutputKey(), action.getOutputValue()));
         }
         
         drl.append("end");
+        System.out.println(drl.toString());
         return drl.toString();
     }
 

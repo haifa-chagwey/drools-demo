@@ -1,0 +1,41 @@
+@startuml Rule Engine Database Schema
+entity Rule {
+  * id : INTEGER <<generated>>
+  --
+  * name : VARCHAR
+  * description : VARCHAR
+  date_created : VARCHAR
+  date_modified : VARCHAR
+  created_by : VARCHAR
+  modified_by : VARCHAR
+}
+
+entity RuleCondition {
+  * id : INTEGER <<generated>>
+  --
+  * field_name : VARCHAR
+  * operator : VARCHAR
+  * threshold_key : VARCHAR
+  * threshold_type : VARCHAR
+  * rule_id : INTEGER <<FK>>
+}
+
+entity RuleAction {
+  * id : INTEGER <<generated>>
+  --
+  * output_key : VARCHAR
+  * output_value : VARCHAR
+  * rule_id : INTEGER <<FK>>
+}
+
+entity TenantConfig {
+  * id : INTEGER <<generated>>
+  --
+  * tenant_id : VARCHAR
+  * config_key : VARCHAR
+  * config_value : VARCHAR
+}
+
+Rule ||--o{ RuleCondition
+Rule ||--o{ RuleAction
+@enduml
