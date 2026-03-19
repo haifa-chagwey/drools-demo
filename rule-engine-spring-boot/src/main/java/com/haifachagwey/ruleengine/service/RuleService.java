@@ -1,9 +1,6 @@
 package com.haifachagwey.ruleengine.service;
 
-import com.haifachagwey.ruleengine.model.Rule;
-import com.haifachagwey.ruleengine.model.RuleAction;
-import com.haifachagwey.ruleengine.model.RuleCondition;
-import com.haifachagwey.ruleengine.model.TenantConfig;
+import com.haifachagwey.ruleengine.model.*;
 import com.haifachagwey.ruleengine.repository.RuleRepository;
 import com.haifachagwey.ruleengine.repository.TenantConfigRepository;
 import jakarta.annotation.PostConstruct;
@@ -65,30 +62,27 @@ public class RuleService {
 
         StringBuilder drl = new StringBuilder();
         drl.append("package rules;\n");
-        drl.append("import java.util.Map;\n");
-        drl.append("global java.util.Map output;\n");
-        drl.append("global java.util.Map tenantConfigs;\n\n");
+        drl.append("import com.haifachagwey.ruleengine.model.RuleContext;\n");
 
+        drl.append("dialect \"mvel\"\n");
 
         drl.append(String.format("rule \"%s\"\n", rule.getName()));
         drl.append("when\n");
         
         List<String> conditionStrings = new ArrayList<>();
         for (RuleCondition cond : rule.getConditions()) {
-            String parser = getParser(cond.getThresholdType());
-            String condition = String.format("this[\"%s\"] %s %s((String)tenantConfigs.get(\"%s\"))",
+            String condition = String.format("facts[\"%s\"] %s tenantConfigs[\"%s\"]",
                     cond.getFieldName(),
                     cond.getOperator(),
-                    parser,
                     cond.getThresholdKey());
             conditionStrings.add(condition);
         }
         
-        drl.append("    $input : Map(").append(String.join(" && ", conditionStrings)).append(")\n");
+        drl.append("    $c : RuleContext(").append(String.join(" && ", conditionStrings)).append(")\n");
         drl.append("then\n");
         
         for (RuleAction action : rule.getActions()) {
-            drl.append(String.format("    output.put(\"%s\", \"%s\");\n",
+            drl.append(String.format("    $c.setResult(\"%s\", \"%s\");\n",
                     action.getOutputKey(), action.getOutputValue()));
         }
         
@@ -97,21 +91,13 @@ public class RuleService {
         return drl.toString();
     }
 
-    private String getParser(String type) {
-        if (type == null) return "String.valueOf";
-        switch (type) {
-            case "Integer": return "Integer.parseInt";
-            case "Double": return "Double.parseDouble";
-            case "Boolean": return "Boolean.parseBoolean";
-            default: return "(String)";
-        }
-    }
-
     public Map<String, Object> executeRules(Map<String, Object> input, String tenantId) {
         KieSession kieSession = kieContainer.newKieSession();
-        Map<String, Object> output = new HashMap<>();
-        Map<String, Object> mergedConfigs = new HashMap<>();
 
+
+        RuleContext ruleContext = new RuleContext();
+        ruleContext.setFacts(input);
+        Map<String, Object> mergedConfigs = new HashMap<>();
         tenantConfigRepository.findByTenantId("GLOBAL")
                 .forEach(c -> mergedConfigs.put(c.getConfigKey(), c.getConfigValue()));
 
@@ -119,12 +105,11 @@ public class RuleService {
             tenantConfigRepository.findByTenantId(tenantId)
                     .forEach(c -> mergedConfigs.put(c.getConfigKey(), c.getConfigValue()));
         }
+        ruleContext.setTenantConfig(mergedConfigs);
 
-        kieSession.setGlobal("output", output);
-        kieSession.setGlobal("tenantConfigs", mergedConfigs);
-        kieSession.insert(input);
+        kieSession.insert(ruleContext);
         kieSession.fireAllRules();
         kieSession.dispose();
-        return output;
+        return ruleContext.getResults();
     }
 }
