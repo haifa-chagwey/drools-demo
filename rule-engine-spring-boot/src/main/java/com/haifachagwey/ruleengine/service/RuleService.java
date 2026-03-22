@@ -23,12 +23,14 @@ public class RuleService {
     private final RuleRepository ruleRepository;
     private final TenantConfigRepository tenantConfigRepository;
     private final KieServices kieServices;
+    private final RuleDrlCompiler ruleDrlCompiler;
     private KieContainer kieContainer;
 
-    public RuleService(RuleRepository ruleRepository, TenantConfigRepository tenantConfigRepository, KieServices kieServices) {
+    public RuleService(RuleRepository ruleRepository, TenantConfigRepository tenantConfigRepository, KieServices kieServices, RuleDrlCompiler ruleDrlCompiler) {
         this.ruleRepository = ruleRepository;
         this.tenantConfigRepository = tenantConfigRepository;
         this.kieServices = kieServices;
+        this.ruleDrlCompiler = ruleDrlCompiler;
     }
 
     @PostConstruct
@@ -41,9 +43,10 @@ public class RuleService {
         List<Rule> rules = ruleRepository.findAll();
 
         for (Rule rule : rules) {
-            String drlContent = generateDrl(rule);
+            String drlContent = ruleDrlCompiler.compile(rule);
             if (drlContent != null && !drlContent.isEmpty()) {
                 kieFileSystem.write("src/main/resources/rules/" + rule.getName() + ".drl", drlContent);
+                System.out.println(drlContent);
             }
         }
 
@@ -54,46 +57,8 @@ public class RuleService {
         this.kieContainer = kieServices.newKieContainer(kieBuilder.getKieModule().getReleaseId());
     }
 
-    private String generateDrl(Rule rule) {
-        if (rule.getConditions() == null || rule.getConditions().isEmpty() ||
-            rule.getActions() == null || rule.getActions().isEmpty()) {
-            return null;
-        }
-
-        StringBuilder drl = new StringBuilder();
-        drl.append("package rules;\n");
-        drl.append("import com.haifachagwey.ruleengine.model.RuleContext;\n");
-
-        drl.append("dialect \"mvel\"\n");
-
-        drl.append(String.format("rule \"%s\"\n", rule.getName()));
-        drl.append("when\n");
-        
-        List<String> conditionStrings = new ArrayList<>();
-        for (RuleCondition cond : rule.getConditions()) {
-            String condition = String.format("facts[\"%s\"] %s tenantConfigs[\"%s\"]",
-                    cond.getFieldName(),
-                    cond.getOperator(),
-                    cond.getThresholdKey());
-            conditionStrings.add(condition);
-        }
-        
-        drl.append("    $c : RuleContext(").append(String.join(" && ", conditionStrings)).append(")\n");
-        drl.append("then\n");
-        
-        for (RuleAction action : rule.getActions()) {
-            drl.append(String.format("    $c.setResult(\"%s\", \"%s\");\n",
-                    action.getOutputKey(), action.getOutputValue()));
-        }
-        
-        drl.append("end");
-        System.out.println(drl.toString());
-        return drl.toString();
-    }
-
     public Map<String, Object> executeRules(Map<String, Object> input, String tenantId) {
         KieSession kieSession = kieContainer.newKieSession();
-
 
         RuleContext ruleContext = new RuleContext();
         ruleContext.setFacts(input);

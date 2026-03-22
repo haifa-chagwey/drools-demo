@@ -1,0 +1,48 @@
+{
+  "name": "VIPOrAdultUS",
+  "description": "Adult US customers or VIPs",
+  "conditionGroups": [
+    {
+      "combinator": "OR",
+      "childGroups": [
+        {
+          "combinator": "AND",
+          "conditions": [
+            {
+              "leftType": "FIELD",
+              "leftValue": "country",
+              "operator": "==",
+              "rightType": "CONSTANT",
+              "rightValue": "US"
+            },
+            {
+              "leftType": "FIELD",
+              "leftValue": "age",
+              "operator": ">=",
+              "rightType": "CONSTANT",
+              "rightValue": "18"
+            }
+          ]
+        },
+        {
+          "combinator": "AND",
+          "conditions": [
+            {
+              "leftType": "FIELD",
+              "leftValue": "vip",
+              "operator": "==",
+              "rightType": "CONSTANT",
+              "rightValue": "true"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "outputKey": "segment",
+      "outputValue": "SPECIAL"
+    }
+  ]
+}

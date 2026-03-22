@@ -28,8 +28,11 @@ public class RuleController {
 
     @PostMapping
     public Rule addRule(@RequestBody Rule rule) {
-        if (rule.getConditions() != null) {
-            rule.getConditions().forEach(c -> c.setRule(rule));
+        if (rule.getConditionGroups() != null) {
+            rule.getConditionGroups().forEach(g -> {
+                g.setRule(rule);
+                linkGroupToChildren(g);
+            });
         }
         if (rule.getActions() != null) {
             rule.getActions().forEach(a -> a.setRule(rule));
@@ -37,6 +40,18 @@ public class RuleController {
         Rule saved = ruleRepository.save(rule);
         ruleService.reloadRules();
         return saved;
+    }
+
+    private void linkGroupToChildren(com.haifachagwey.ruleengine.model.RuleConditionGroup group) {
+        if (group.getConditions() != null) {
+            group.getConditions().forEach(c -> c.setGroup(group));
+        }
+        if (group.getChildGroups() != null) {
+            group.getChildGroups().forEach(cg -> {
+                cg.setParentGroup(group);
+                linkGroupToChildren(cg);
+            });
+        }
     }
 
     @DeleteMapping("/{id}")

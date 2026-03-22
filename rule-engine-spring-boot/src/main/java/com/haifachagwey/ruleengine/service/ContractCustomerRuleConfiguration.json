@@ -1,0 +1,24 @@
+{
+  "name": "ContractCustomerRule",
+  "description": "Matches contract customers",
+  "conditionGroups": [
+    {
+      "combinator": "AND",
+      "conditions": [
+        {
+          "leftType": "FIELD",
+          "leftValue": "customerType",
+          "operator": "==",
+          "rightType": "CONSTANT",
+          "rightValue": "CONTRACT"
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "outputKey": "customerCategory",
+      "outputValue": "CONTRACT"
+    }
+  ]
+}

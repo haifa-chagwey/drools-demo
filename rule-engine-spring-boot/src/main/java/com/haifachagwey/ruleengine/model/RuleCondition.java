@@ -19,10 +19,22 @@ public class RuleCondition {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    private String fieldName;
-    private String operator; // e.g., >, <, ==, !=
-    private String thresholdKey;
-    private String thresholdType; // Integer, Double, Boolean, String
+    private String operator; // ==, !=, >, <, >=, <=, contains, in
+
+    @Enumerated(EnumType.STRING)
+    private OperandType leftType;
+
+    private String leftValue;
+
+    @Enumerated(EnumType.STRING)
+    private OperandType rightType;
+
+    private String rightValue;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "group_id")
+    @JsonBackReference
+    private RuleConditionGroup group;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "rule_id")

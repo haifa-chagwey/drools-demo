@@ -1,0 +1,14 @@
+package rules;
+
+import com.haifachagwey.ruleengine.model.RuleContext;
+
+dialect "mvel"
+
+rule "ContractCustomerRule"
+when
+    $c : RuleContext(
+        facts["customerType"] == "CONTRACT"
+    )
+then
+    $c.setResult("customerCategory", "CONTRACT");
+end

@@ -1,0 +1,21 @@
+package rules;
+
+import com.haifachagwey.ruleengine.model.RuleContext;
+
+dialect "mvel"
+
+rule "VIPOrAdultUS"
+when
+    $c : RuleContext(
+        (
+            facts["country"] == "US" &&
+            facts["age"] >= 18
+        )
+        ||
+        (
+            facts["vip"] == true
+        )
+    )
+then
+    $c.setResult("segment", "SPECIAL");
+end
