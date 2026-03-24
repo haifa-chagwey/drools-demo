@@ -1,12 +1,12 @@
 package com.haifachagwey.ruleengine.controller;
 
 import com.haifachagwey.ruleengine.model.Rule;
+import com.haifachagwey.ruleengine.model.RuleConditionGroup;
 import com.haifachagwey.ruleengine.repository.RuleRepository;
 import com.haifachagwey.ruleengine.service.RuleService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:4200")
@@ -28,30 +28,7 @@ public class RuleController {
 
     @PostMapping
     public Rule addRule(@RequestBody Rule rule) {
-        if (rule.getConditionGroups() != null) {
-            rule.getConditionGroups().forEach(g -> {
-                g.setRule(rule);
-                linkGroupToChildren(g);
-            });
-        }
-        if (rule.getActions() != null) {
-            rule.getActions().forEach(a -> a.setRule(rule));
-        }
-        Rule saved = ruleRepository.save(rule);
-        ruleService.reloadRules();
-        return saved;
-    }
-
-    private void linkGroupToChildren(com.haifachagwey.ruleengine.model.RuleConditionGroup group) {
-        if (group.getConditions() != null) {
-            group.getConditions().forEach(c -> c.setGroup(group));
-        }
-        if (group.getChildGroups() != null) {
-            group.getChildGroups().forEach(cg -> {
-                cg.setParentGroup(group);
-                linkGroupToChildren(cg);
-            });
-        }
+        return ruleService.saveRule(rule);
     }
 
     @DeleteMapping("/{id}")

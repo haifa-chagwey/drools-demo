@@ -24,7 +24,7 @@ public class RuleAction {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "rule_id")
-    @JsonBackReference
+    @JsonBackReference("rule-actions")
     private Rule rule;
 
 }

@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class RuleDrlCompiler {
@@ -59,8 +58,8 @@ public class RuleDrlCompiler {
             }
         }
 
-        if (group.getChildGroups() != null) {
-            for (RuleConditionGroup child : group.getChildGroups()) {
+        if (group.getSubConditionGroups() != null) {
+            for (RuleConditionGroup child : group.getSubConditionGroups()) {
                 parts.add("(" + compileGroup(child) + ")");
             }
         }
@@ -70,9 +69,9 @@ public class RuleDrlCompiler {
     }
 
     private String compileCondition(RuleCondition condition) {
-        return operandToExpression(condition.getLeftType(), condition.getLeftValue())
-                + " " + condition.getOperator() + " "
-                + operandToExpression(condition.getRightType(), condition.getRightValue());
+        return "facts[\"" + condition.getLeftOperand() + "\"]"
+                + " " + operatorToExpression(condition.getOperator()) + " "
+                + operandToExpression(condition.getRightOperandType(), condition.getRightOperandValue());
     }
 
     private String operandToExpression(OperandType type, String value) {
@@ -80,6 +79,18 @@ public class RuleDrlCompiler {
             case FIELD -> "facts[\"" + value + "\"]";
             case CONFIG -> "tenantConfigs[\"" + value + "\"]";
             case CONSTANT -> formatConstant(value);
+        };
+    }
+
+    private String operatorToExpression(OperatorType type) {
+
+        return switch (type) {
+            case GREATER_THAN -> ">";
+            case LESS_THAN -> "<";
+            case GREATER_THAN_OR_EQUAL -> ">=";
+            case LESS_THAN_OR_EQUAL -> "<=";
+            case EQUALS -> "==";
+            case NOT_EQUALS -> "!=";
         };
     }
 

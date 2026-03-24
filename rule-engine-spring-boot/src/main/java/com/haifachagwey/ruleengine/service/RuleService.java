@@ -11,11 +11,9 @@ import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class RuleService {
@@ -38,6 +36,33 @@ public class RuleService {
         reloadRules();
     }
 
+    public Rule saveRule(Rule rule) {
+        if (rule.getConditionGroups() != null) {
+            rule.getConditionGroups().forEach(g -> {
+                g.setRule(rule);
+                linkGroupToChildren(g);
+            });
+        }
+        if (rule.getActions() != null) {
+            rule.getActions().forEach(a -> a.setRule(rule));
+        }
+        Rule saved = ruleRepository.save(rule);
+        reloadRules();
+        return saved;
+    }
+
+    private void linkGroupToChildren(RuleConditionGroup group) {
+        if (group.getConditions() != null) {
+            group.getConditions().forEach(c -> c.setGroup(group));
+        }
+        if (group.getSubConditionGroups() != null) {
+            group.getSubConditionGroups().forEach(cg -> {
+                cg.setParentGroup(group);
+                linkGroupToChildren(cg);
+            });
+        }
+    }
+
     public synchronized void reloadRules() {
         KieFileSystem kieFileSystem = kieServices.newKieFileSystem();
         List<Rule> rules = ruleRepository.findAll();
@@ -46,7 +71,6 @@ public class RuleService {
             String drlContent = ruleDrlCompiler.compile(rule);
             if (drlContent != null && !drlContent.isEmpty()) {
                 kieFileSystem.write("src/main/resources/rules/" + rule.getName() + ".drl", drlContent);
-                System.out.println(drlContent);
             }
         }
 

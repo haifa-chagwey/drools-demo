@@ -12,9 +12,8 @@ when
             facts["age"] >= 18
         )
         ||
-        (
-            facts["vip"] == true
-        )
+
+            facts["vip"] == tenantConfig["vip"]
     )
 then
     $c.setResult("segment", "SPECIAL");

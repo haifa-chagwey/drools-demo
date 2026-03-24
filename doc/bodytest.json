@@ -1,0 +1,61 @@
+{
+  "name": "TestRule",
+  "description": "Trigger logic for test cases",
+  "conditionGroups": [
+    {
+      "combinator": "OR",
+      "conditions": [
+        {
+          "leftOperand": "status",
+          "operator": "==",
+          "rightOperandType": "CONSTANT",
+          "rightOperandValue": "TEST"
+        }
+      ],
+      "subConditionGroups": [
+        {
+          "combinator": "AND",
+          "conditions": [
+            {
+              "leftOperand": "amount",
+              "operator": ">",
+              "rightOperandType": "CONSTANT",
+              "rightOperandValue": "100"
+            },
+            {
+              "leftOperand": "currency",
+              "operator": "==",
+              "rightOperandType": "CONSTANT",
+              "rightOperandValue": "EUR"
+            }
+          ],
+          "subConditionGroups": [
+            {
+              "combinator": "OR",
+              "conditions": [
+                {
+                  "leftOperand": "amount",
+                  "operator": "<",
+                  "rightOperandType": "CONSTANT",
+                  "rightOperandValue": "500"
+                },
+                {
+                  "leftOperand": "currency",
+                  "operator": "==",
+                  "rightOperandType": "CONSTANT",
+                  "rightOperandValue": "EUR"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "outputKey": "requiresApproval",
+      "outputValue": "false"
+    }
+  ]
+}

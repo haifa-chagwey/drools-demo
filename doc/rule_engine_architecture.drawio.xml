@@ -1,0 +1,63 @@
+<mxfile host="65bd71144e">
+    <diagram id="rule-engine-architecture" name="Rule Engine Architecture">
+        <mxGraphModel dx="1000" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                
+                <!-- Entity: Rule -->
+                <mxCell id="rule" value="&lt;b&gt;Rule&lt;/b&gt;&#10;--&#10;id: Integer&#10;name: String&#10;description: String&#10;dateCreated: String&#10;dateModified: String&#10;createdBy: String&#10;modifiedBy: String" style="shape=table;startSize=30;container=1;collapsible=1;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;" vertex="1" parent="1">
+                    <mxGeometry x="40" y="40" width="180" height="160" as="geometry"/>
+                </mxCell>
+                
+                <!-- Entity: RuleConditionGroup -->
+                <mxCell id="group" value="&lt;b&gt;RuleConditionGroup&lt;/b&gt;&#10;--&#10;id: Integer&#10;combinator: String (AND/OR)&#10;rule_id: Integer&#10;parent_group_id: Integer" style="shape=table;startSize=30;container=1;collapsible=1;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;" vertex="1" parent="1">
+                    <mxGeometry x="300" y="40" width="200" height="100" as="geometry"/>
+                </mxCell>
+                
+                <!-- Entity: RuleCondition -->
+                <mxCell id="condition" value="&lt;b&gt;RuleCondition&lt;/b&gt;&#10;--&#10;id: Integer&#10;operator: String&#10;fieldName: String (Fact Key)&#10;comparisonType: OperandType&#10;comparisonValue: String&#10;group_id: Integer" style="shape=table;startSize=30;container=1;collapsible=1;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;" vertex="1" parent="1">
+                    <mxGeometry x="580" y="40" width="180" height="130" as="geometry"/>
+                </mxCell>
+                
+                <!-- Entity: RuleAction -->
+                <mxCell id="action" value="&lt;b&gt;RuleAction&lt;/b&gt;&#10;--&#10;id: Integer&#10;outputKey: String&#10;outputValue: String&#10;rule_id: Integer" style="shape=table;startSize=30;container=1;collapsible=1;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;" vertex="1" parent="1">
+                    <mxGeometry x="40" y="280" width="180" height="100" as="geometry"/>
+                </mxCell>
+                
+                <!-- Entity: TenantConfig -->
+                <mxCell id="config" value="&lt;b&gt;TenantConfig&lt;/b&gt;&#10;--&#10;id: Integer&#10;tenantId: String&#10;configKey: String&#10;configValue: String" style="shape=table;startSize=30;container=1;collapsible=1;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;" vertex="1" parent="1">
+                    <mxGeometry x="300" y="280" width="200" height="100" as="geometry"/>
+                </mxCell>
+
+                <!-- Relationships -->
+                <!-- Rule - RuleConditionGroup -->
+                <mxCell id="rel1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=ERoneToMany;endFill=0;" edge="1" parent="1" source="rule" target="group">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+
+                <!-- RuleConditionGroup - RuleCondition -->
+                <mxCell id="rel2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=ERoneToMany;endFill=0;" edge="1" parent="1" source="group" target="condition">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+
+                <!-- RuleConditionGroup - RuleConditionGroup (Recursive) -->
+                <mxCell id="rel3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.75;entryDx=0;entryDy=0;endArrow=ERoneToMany;endFill=0;" edge="1" parent="1" source="group" target="group">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="400" y="180"/>
+                            <mxPoint x="520" y="180"/>
+                            <mxPoint x="520" y="115"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+
+                <!-- Rule - RuleAction -->
+                <mxCell id="rel4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;endArrow=ERoneToMany;endFill=0;" edge="1" parent="1" source="rule" target="action">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

@@ -17,6 +17,7 @@ import java.util.List;
 @Builder
 @Table(name = "rule_condition_groups")
 public class RuleConditionGroup {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -25,19 +26,20 @@ public class RuleConditionGroup {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "rule_id")
-    @JsonBackReference
+    @JsonBackReference("rule-condition-groups")
     private Rule rule;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_group_id")
-    @JsonBackReference
-    private RuleConditionGroup parentGroup;
-
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonManagedReference("group-conditions")
     private List<RuleCondition> conditions;
 
     @OneToMany(mappedBy = "parentGroup", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    private List<RuleConditionGroup> childGroups;
+    @JsonManagedReference("parent-child-groups")
+    private List<RuleConditionGroup> subConditionGroups;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_group_id")
+    @JsonBackReference("parent-child-groups")
+    private RuleConditionGroup parentGroup;
+
 }
