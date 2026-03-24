@@ -72,14 +72,13 @@ public class RuleDrlCompiler {
 
     private String operandToExpression(OperandType type, String value) {
         return switch (type) {
-            case FIELD -> "facts[\"" + value + "\"]";
-            case CONFIG -> "tenantConfigs[\"" + value + "\"]";
             case CONSTANT -> formatConstant(value);
+            case CONFIG -> "tenantConfigs[\"" + value + "\"]";
+            case FIELD -> "facts[\"" + value + "\"]";
         };
     }
 
     private String operatorToExpression(OperatorType type) {
-
         return switch (type) {
             case GREATER_THAN -> ">";
             case LESS_THAN -> "<";

@@ -31,6 +31,8 @@ public class RuleService {
         this.ruleDrlCompiler = ruleDrlCompiler;
     }
 
+//    Rule Management
+
     @PostConstruct
     public void init() {
         reloadRules();
@@ -60,21 +62,26 @@ public class RuleService {
         this.kieContainer = kieServices.newKieContainer(kieBuilder.getKieModule().getReleaseId());
     }
 
+//    Rule Execution
+
     public Map<String, Object> executeRules(Map<String, Object> input, String tenantId) {
         KieSession kieSession = kieContainer.newKieSession();
 
+//        Create a new context
         RuleContext ruleContext = new RuleContext();
+//        Insert facts into context
         ruleContext.setFacts(input);
+
+//        Prepare tenant configs and insert into context
         Map<String, Object> mergedConfigs = new HashMap<>();
         tenantConfigRepository.findByTenantId("GLOBAL")
                 .forEach(c -> mergedConfigs.put(c.getConfigKey(), c.getConfigValue()));
-
         if (tenantId != null && !"GLOBAL".equals(tenantId)) {
             tenantConfigRepository.findByTenantId(tenantId)
                     .forEach(c -> mergedConfigs.put(c.getConfigKey(), c.getConfigValue()));
         }
         ruleContext.setTenantConfig(mergedConfigs);
-
+//        Execute rules
         kieSession.insert(ruleContext);
         kieSession.fireAllRules();
         kieSession.dispose();
