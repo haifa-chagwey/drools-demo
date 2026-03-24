@@ -1,7 +1,6 @@
 package com.haifachagwey.ruleengine.controller;
 
 import com.haifachagwey.ruleengine.model.Rule;
-import com.haifachagwey.ruleengine.model.RuleConditionGroup;
 import com.haifachagwey.ruleengine.repository.RuleRepository;
 import com.haifachagwey.ruleengine.service.RuleService;
 import org.springframework.web.bind.annotation.*;

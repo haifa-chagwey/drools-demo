@@ -20,33 +20,29 @@ public class RuleDrlCompiler {
         drl.append("when\n");
         drl.append("    $c : RuleContext(");
 
-        RuleConditionGroup rootGroup = findRootGroup(rule);
-        if (rootGroup != null) {
-            drl.append(compileGroup(rootGroup));
+        if (rule.getConditionGroups() != null && !rule.getConditionGroups().isEmpty()) {
+            List<String> groupParts = new ArrayList<>();
+            for (RuleConditionGroup group : rule.getConditionGroups()) {
+                groupParts.add("(" + compileGroup(group) + ")");
+            }
+            drl.append(String.join(" && ", groupParts));
         }
 
         drl.append(")\n");
         drl.append("then\n");
 
-        for (RuleAction action : rule.getActions()) {
-            drl.append("    $c.setResult(\"")
-               .append(action.getOutputKey())
-               .append("\", \"")
-               .append(action.getOutputValue())
-               .append("\");\n");
+        if (rule.getActions() != null) {
+            for (RuleAction action : rule.getActions()) {
+                drl.append("    $c.setResult(\"")
+                   .append(action.getOutputKey())
+                   .append("\", \"")
+                   .append(action.getOutputValue())
+                   .append("\");\n");
+            }
         }
 
         drl.append("end\n");
         return drl.toString();
-    }
-
-    private RuleConditionGroup findRootGroup(Rule rule) {
-        if (rule.getConditionGroups() == null) return null;
-        return rule.getConditionGroups()
-                .stream()
-                .filter(g -> g.getParentGroup() == null)
-                .findFirst()
-                .orElse(null);
     }
 
     private String compileGroup(RuleConditionGroup group) {
@@ -69,9 +65,9 @@ public class RuleDrlCompiler {
     }
 
     private String compileCondition(RuleCondition condition) {
-        return "facts[\"" + condition.getLeftOperand() + "\"]"
+        return "facts[\"" + condition.getTargetField() + "\"]"
                 + " " + operatorToExpression(condition.getOperator()) + " "
-                + operandToExpression(condition.getRightOperandType(), condition.getRightOperandValue());
+                + operandToExpression(condition.getValueType(), condition.getValue());
     }
 
     private String operandToExpression(OperandType type, String value) {

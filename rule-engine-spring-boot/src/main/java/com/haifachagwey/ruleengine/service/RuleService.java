@@ -37,30 +37,9 @@ public class RuleService {
     }
 
     public Rule saveRule(Rule rule) {
-        if (rule.getConditionGroups() != null) {
-            rule.getConditionGroups().forEach(g -> {
-                g.setRule(rule);
-                linkGroupToChildren(g);
-            });
-        }
-        if (rule.getActions() != null) {
-            rule.getActions().forEach(a -> a.setRule(rule));
-        }
         Rule saved = ruleRepository.save(rule);
         reloadRules();
         return saved;
-    }
-
-    private void linkGroupToChildren(RuleConditionGroup group) {
-        if (group.getConditions() != null) {
-            group.getConditions().forEach(c -> c.setGroup(group));
-        }
-        if (group.getSubConditionGroups() != null) {
-            group.getSubConditionGroups().forEach(cg -> {
-                cg.setParentGroup(group);
-                linkGroupToChildren(cg);
-            });
-        }
     }
 
     public synchronized void reloadRules() {
