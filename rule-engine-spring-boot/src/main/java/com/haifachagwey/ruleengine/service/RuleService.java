@@ -47,15 +47,12 @@ public class RuleService {
     public synchronized void reloadRules() {
         KieFileSystem kieFileSystem = kieServices.newKieFileSystem();
         List<Rule> rules = ruleRepository.findAll();
-
         for (Rule rule : rules) {
-            if (!rule.isEnabled()) continue;
             String drlContent = ruleDrlCompiler.compile(rule);
             if (drlContent != null && !drlContent.isEmpty()) {
                 kieFileSystem.write("src/main/resources/rules/" + rule.getName() + ".drl", drlContent);
             }
         }
-
         KieBuilder kieBuilder = kieServices.newKieBuilder(kieFileSystem).buildAll();
         if (kieBuilder.getResults().hasMessages(org.kie.api.builder.Message.Level.ERROR)) {
             throw new RuntimeException("Build Errors:\n" + kieBuilder.getResults().toString());

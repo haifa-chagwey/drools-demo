@@ -21,12 +21,13 @@ public class RuleDrlCompiler {
         drl.append("    $c : RuleContext(");
 
         RuleDefinition definition = rule.getDefinition();
-        if (definition != null && definition.getConditionGroups() != null && !definition.getConditionGroups().isEmpty()) {
-            List<String> groupParts = new ArrayList<>();
-            for (RuleConditionGroup group : definition.getConditionGroups()) {
-                groupParts.add("(" + compileGroup(group) + ")");
+        if (definition != null && definition.getConditions() != null && !definition.getConditions().isEmpty()) {
+            List<String> parts = new ArrayList<>();
+            for (RuleCondition condition : definition.getConditions()) {
+                parts.add(compileCondition(condition));
             }
-            drl.append(String.join(" && ", groupParts));
+            String joiner = "OR".equalsIgnoreCase(definition.getCombinator()) ? " || " : " && ";
+            drl.append(String.join(joiner, parts));
         } else {
             drl.append("eval(true)");
         }
@@ -48,24 +49,6 @@ public class RuleDrlCompiler {
         return drl.toString();
     }
 
-    private String compileGroup(RuleConditionGroup group) {
-        List<String> parts = new ArrayList<>();
-
-        if (group.getConditions() != null) {
-            for (RuleCondition condition : group.getConditions()) {
-                parts.add(compileCondition(condition));
-            }
-        }
-
-        if (group.getSubConditionGroups() != null) {
-            for (RuleConditionGroup child : group.getSubConditionGroups()) {
-                parts.add("(" + compileGroup(child) + ")");
-            }
-        }
-
-        String joiner = "OR".equalsIgnoreCase(group.getCombinator()) ? " || " : " && ";
-        return String.join(joiner, parts);
-    }
 
     private String compileCondition(RuleCondition condition) {
         return "facts[\"" + condition.getTargetField() + "\"]"

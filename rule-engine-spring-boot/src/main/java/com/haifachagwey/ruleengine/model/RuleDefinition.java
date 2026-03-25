@@ -16,8 +16,10 @@ public class RuleDefinition {
 
     private String description;
 
+    private String combinator; // AND or OR
+    
     @Builder.Default
-    private List<RuleConditionGroup> conditionGroups = new ArrayList<>();
+    private List<RuleCondition> conditions = new ArrayList<>();
 
     @Builder.Default
     private List<RuleAction> actions = new ArrayList<>();
