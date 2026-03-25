@@ -49,6 +49,7 @@ public class RuleService {
         List<Rule> rules = ruleRepository.findAll();
 
         for (Rule rule : rules) {
+            if (!rule.isEnabled()) continue;
             String drlContent = ruleDrlCompiler.compile(rule);
             if (drlContent != null && !drlContent.isEmpty()) {
                 kieFileSystem.write("src/main/resources/rules/" + rule.getName() + ".drl", drlContent);

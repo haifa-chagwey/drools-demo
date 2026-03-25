@@ -20,19 +20,22 @@ public class RuleDrlCompiler {
         drl.append("when\n");
         drl.append("    $c : RuleContext(");
 
-        if (rule.getConditionGroups() != null && !rule.getConditionGroups().isEmpty()) {
+        RuleDefinition definition = rule.getDefinition();
+        if (definition != null && definition.getConditionGroups() != null && !definition.getConditionGroups().isEmpty()) {
             List<String> groupParts = new ArrayList<>();
-            for (RuleConditionGroup group : rule.getConditionGroups()) {
+            for (RuleConditionGroup group : definition.getConditionGroups()) {
                 groupParts.add("(" + compileGroup(group) + ")");
             }
             drl.append(String.join(" && ", groupParts));
+        } else {
+            drl.append("eval(true)");
         }
 
         drl.append(")\n");
         drl.append("then\n");
 
-        if (rule.getActions() != null) {
-            for (RuleAction action : rule.getActions()) {
+        if (definition != null && definition.getActions() != null) {
+            for (RuleAction action : definition.getActions()) {
                 drl.append("    $c.setResult(\"")
                    .append(action.getOutputKey())
                    .append("\", \"")

@@ -1,0 +1,32 @@
+package rules;
+
+import com.haifachagwey.ruleengine.model.RuleContext;
+
+dialect "mvel"
+
+//////////////////////////////////////////////////////
+// Rule 1 - Night tolerance small amount
+//////////////////////////////////////////////////////
+rule "Night tolerance small amount"
+when
+    $c : RuleContext(
+        facts["amount"] <= 1 &&
+        (facts["exitTime"] >= "19:00" || facts["exitTime"] <= "06:00")
+    )
+then
+    $c.setResult("action", "LOST_REVENUE");
+    $c.setResult("openBarrier", true);
+    System.out.println("Night tolerance: small amount, lost revenue booked + barrier open");
+end
+
+//////////////////////////////////////////////////////
+// Rule 2 - Exit requires operator
+//////////////////////////////////////////////////////
+rule "Exit requires operator"
+when
+    $c : RuleContext()
+then
+    $c.setResult("action", "DIRECT_PAYMENT");
+    $c.setResult("triggerIntercom", true);
+    System.out.println("Exit requires operator: intercom triggered + direct payment booked");
+end

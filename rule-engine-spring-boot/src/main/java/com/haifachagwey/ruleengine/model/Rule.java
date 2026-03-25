@@ -21,20 +21,29 @@ public class Rule {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(unique = true, nullable = false)
     private String name;
-    private String description;
+
+    private boolean enabled = true;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
-    private List<RuleConditionGroup> conditionGroups;
-
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "jsonb")
-    private List<RuleAction> actions;
+    private RuleDefinition definition;
 
     private String dateCreated;
     private String dateModified;
     private String createdBy;
     private String modifiedBy;
+
+    @PrePersist
+    protected void onCreate() {
+        dateCreated = java.time.LocalDateTime.now().toString();
+        dateModified = dateCreated;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        dateModified = java.time.LocalDateTime.now().toString();
+    }
 
 }

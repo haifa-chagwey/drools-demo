@@ -1,0 +1,54 @@
+package rules;
+
+import com.haifachagwey.ruleengine.model.RuleContext;
+
+dialect "mvel"
+
+//////////////////////////////////////////////////////
+// Rule 1 - Direct payment required
+//////////////////////////////////////////////////////
+rule "Contract parker expired - direct payment"
+salience 30
+when
+    $c : RuleContext(
+        facts["productGroup"] == "CONTRACT" &&
+        facts["expired"] == true &&
+        facts["amount"] > 10
+    )
+then
+    $c.setResult("action", "DIRECT_PAYMENT");
+    System.out.println("Direct payment required");
+end
+
+//////////////////////////////////////////////////////
+// Rule 2 - Later payment (invoice)
+//////////////////////////////////////////////////////
+rule "Contract parker expired - later payment"
+salience 20
+when
+    $c : RuleContext(
+        facts["productGroup"] == "CONTRACT" &&
+        facts["expired"] == true &&
+        facts["amount"] > 2 &&
+        facts["amount"] <= 10
+    )
+then
+    $c.setResult("action", "LATER_PAYMENT");
+    $c.setResult("openBarrier", true);
+end
+
+//////////////////////////////////////////////////////
+// Rule 3 - Lost revenue
+//////////////////////////////////////////////////////
+rule "Contract parker expired - lost revenue"
+salience 10
+when
+    $c : RuleContext(
+        facts["productGroup"] == "CONTRACT" &&
+        facts["expired"] == true &&
+        facts["amount"] <= 2
+    )
+then
+    $c.setResult("action", "LOST_REVENUE");
+    $c.setResult("openBarrier", true);
+end
