@@ -1,6 +1,7 @@
 package com.haifachagwey.ruleengine.service;
 
 import com.haifachagwey.ruleengine.model.*;
+import com.haifachagwey.ruleengine.repository.FactDefinitionRepository;
 import com.haifachagwey.ruleengine.repository.RuleRepository;
 import com.haifachagwey.ruleengine.repository.TenantConfigRepository;
 import jakarta.annotation.PostConstruct;
@@ -22,13 +23,15 @@ public class RuleService {
     private final TenantConfigRepository tenantConfigRepository;
     private final KieServices kieServices;
     private final RuleDrlCompiler ruleDrlCompiler;
+    private final FactDefinitionRepository factDefinitionRepository;
     private KieContainer kieContainer;
 
-    public RuleService(RuleRepository ruleRepository, TenantConfigRepository tenantConfigRepository, KieServices kieServices, RuleDrlCompiler ruleDrlCompiler) {
+    public RuleService(RuleRepository ruleRepository, TenantConfigRepository tenantConfigRepository, KieServices kieServices, RuleDrlCompiler ruleDrlCompiler, FactDefinitionRepository factDefinitionRepository) {
         this.ruleRepository = ruleRepository;
         this.tenantConfigRepository = tenantConfigRepository;
         this.kieServices = kieServices;
         this.ruleDrlCompiler = ruleDrlCompiler;
+        this.factDefinitionRepository = factDefinitionRepository;
     }
 
 //    Rule Management
@@ -39,9 +42,25 @@ public class RuleService {
     }
 
     public Rule saveRule(Rule rule) {
+        validateRule(rule);
         Rule saved = ruleRepository.save(rule);
         reloadRules();
         return saved;
+    }
+
+    private void validateRule(Rule rule) {
+        if (rule.getDefinition() != null && rule.getDefinition().getConditions() != null) {
+            for (RuleCondition condition : rule.getDefinition().getConditions()) {
+                if (condition.getTargetField() != null) {
+                    factDefinitionRepository.findByKey(condition.getTargetField())
+                            .orElseThrow(() -> new IllegalArgumentException("Unknown fact: " + condition.getTargetField()));
+                }
+                if (condition.getValueType() == OperandType.FIELD && condition.getValue() != null) {
+                    factDefinitionRepository.findByKey(condition.getValue())
+                            .orElseThrow(() -> new IllegalArgumentException("Unknown fact in condition value: " + condition.getValue()));
+                }
+            }
+        }
     }
 
     public synchronized void reloadRules() {

@@ -64,7 +64,7 @@ public class RuleDrlCompiler {
         };
     }
 
-    private String operatorToExpression(OperatorType type) {
+    private String operatorToExpression(Operator type) {
         return switch (type) {
             case GREATER_THAN -> ">";
             case LESS_THAN -> "<";

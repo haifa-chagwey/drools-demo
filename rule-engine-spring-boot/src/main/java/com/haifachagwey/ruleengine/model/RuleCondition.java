@@ -13,7 +13,7 @@ public class RuleCondition {
 
     private String targetField;
 
-    private OperatorType operator; // GREATER_THAN, LESS_THAN, EQUALS, etc.
+    private Operator operator; // GREATER_THAN, LESS_THAN, EQUALS, etc.
 
     private OperandType valueType;
 

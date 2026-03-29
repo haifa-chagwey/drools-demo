@@ -1,6 +1,6 @@
 package com.haifachagwey.ruleengine.model;
 
-public enum OperatorType {
+public enum Operator {
     GREATER_THAN,
     LESS_THAN,
     GREATER_THAN_OR_EQUAL,
