@@ -1,0 +1,36 @@
+package rules;
+
+import com.haifachagwey.ruleengine.model.RuleContext;
+
+dialect "mvel"
+
+//////////////////////////////////////////////////////
+// Rule 1 - Default operator
+//////////////////////////////////////////////////////
+rule "Access profile - operator"
+salience 100
+when
+    $c : RuleContext(
+        facts["deviceType"] == "ENTRY" &&
+        facts["carAccess"] == true
+    )
+then
+    $c.setResult("action", "INTERCOM");
+    System.out.println("Out of profile → operator");
+end
+
+//////////////////////////////////////////////////////
+// Rule 2 - Grace time violated → allow
+//////////////////////////////////////////////////////
+rule "Access profile - grace time violated"
+salience 90
+when
+    $c : RuleContext(
+        facts["autoHandling"] == true &&
+        facts["graceTimeViolated"] == true
+    )
+then
+    $c.setResult("action", "OPEN_BARRIER");
+    $c.setResult("financialAction", "OUT_OF_PROFILE_ENTRY");
+    System.out.println("Grace time violated → allow entry with special product");
+end

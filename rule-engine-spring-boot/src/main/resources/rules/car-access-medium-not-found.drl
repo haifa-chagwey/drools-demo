@@ -1,0 +1,60 @@
+package rules;
+
+import com.haifachagwey.ruleengine.model.RuleContext;
+
+dialect "mvel"
+
+//////////////////////////////////////////////////////
+// Rule 1 - Default: operator handling
+//////////////////////////////////////////////////////
+rule "Car access - unknown LPN - operator"
+salience 100
+when
+    $c : RuleContext(
+        facts["deviceType"] == "ENTRY" &&
+        facts["carAccess"] == true
+    )
+then
+    $c.setResult("action", "INTERCOM");
+    System.out.println("Unknown LPN → operator handling");
+end
+
+//////////////////////////////////////////////////////
+// Rule 2 - Auto handling - no fuzzy match
+//////////////////////////////////////////////////////
+rule "Car access - no fuzzy candidate"
+salience 90
+when
+    $c : RuleContext(
+        facts["deviceType"] == "ENTRY" &&
+        facts["carAccess"] == true &&
+        facts["autoHandling"] == true &&
+        (
+            facts["fuzzyEnabled"] == false ||
+            (facts["fuzzyEnabled"] == true && facts["fuzzyMatchFound"] == false)
+        )
+    )
+then
+    $c.setResult("action", "OPEN_BARRIER");
+    $c.setResult("financialAction", "CREATE_SHOWUP_PRODUCT");
+    System.out.println("No fuzzy match → open barrier + showup");
+end
+
+//////////////////////////////////////////////////////
+// Rule 3 - Auto handling - fuzzy match found
+//////////////////////////////////////////////////////
+rule "Car access - fuzzy candidate found"
+salience 80
+when
+    $c : RuleContext(
+        facts["deviceType"] == "ENTRY" &&
+        facts["carAccess"] == true &&
+        facts["autoHandling"] == true &&
+        facts["fuzzyEnabled"] == true &&
+        facts["fuzzyMatchFound"] == true
+    )
+then
+    $c.setResult("action", "OPEN_BARRIER");
+    $c.setResult("financialAction", "REGISTERED_ENTRY");
+    System.out.println("Fuzzy match → registered entry");
+end

@@ -1,0 +1,67 @@
+package rules;
+
+import com.haifachagwey.ruleengine.model.RuleContext;
+
+dialect "mvel"
+
+//////////////////////////////////////////////////////
+// Rule 1 - Default operator
+//////////////////////////////////////////////////////
+rule "Counter full - operator"
+salience 100
+when
+    $c : RuleContext(
+        facts["deviceType"] == "ENTRY"
+    )
+then
+    $c.setResult("action", "INTERCOM");
+    System.out.println("Counter issue → operator");
+end
+
+//////////////////////////////////////////////////////
+// Rule 2 - Counter FULL + NORMAL mode
+//////////////////////////////////////////////////////
+rule "Counter full - overbook allowed"
+salience 90
+when
+    $c : RuleContext(
+        facts["autoHandling"] == true &&
+        facts["counterState"] == "FULL" &&
+        facts["counterMode"] == "NORMAL"
+    )
+then
+    $c.setResult("action", "OPEN_BARRIER");
+    $c.setResult("counterAction", "OVERBOOK");
+    System.out.println("Counter full → overbook");
+end
+
+//////////////////////////////////////////////////////
+// Rule 3 - Counter FREE but car park FULL
+//////////////////////////////////////////////////////
+rule "Car park full"
+salience 80
+when
+    $c : RuleContext(
+        facts["autoHandling"] == true &&
+        facts["counterState"] == "FREE" &&
+        facts["carParkFull"] == true
+    )
+then
+    $c.setResult("action", "INTERCOM");
+    System.out.println("Car park full → stop customer");
+end
+
+//////////////////////////////////////////////////////
+// Rule 4 - Counter BLOCKED
+//////////////////////////////////////////////////////
+rule "Counter blocked"
+salience 70
+when
+    $c : RuleContext(
+        facts["autoHandling"] == true &&
+        facts["counterState"] == "BLOCKED"
+    )
+then
+    $c.setResult("action", "INTERCOM");
+    System.out.println("Counter blocked → stop customer");
+end

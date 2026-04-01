@@ -13,7 +13,7 @@ when
     $c : RuleContext(
         facts["productGroup"] == "CONTRACT" &&
         facts["expired"] == true &&
-        facts["amount"] > 10
+        facts["amount"] > tenantConfigs["mediumAmountThreshold"]
     )
 then
     $c.setResult("action", "DIRECT_PAYMENT");
@@ -29,8 +29,8 @@ when
     $c : RuleContext(
         facts["productGroup"] == "CONTRACT" &&
         facts["expired"] == true &&
-        facts["amount"] > 2 &&
-        facts["amount"] <= 10
+        facts["amount"] > tenantConfigs["lowAmountThreshold"] &&
+        facts["amount"] <= tenantConfigs["mediumAmountThreshold"]
     )
 then
     $c.setResult("action", "LATER_PAYMENT");
@@ -46,7 +46,7 @@ when
     $c : RuleContext(
         facts["productGroup"] == "CONTRACT" &&
         facts["expired"] == true &&
-        facts["amount"] <= 2
+        facts["amount"] <= tenantConfigs["lowAmountThreshold"]
     )
 then
     $c.setResult("action", "LOST_REVENUE");

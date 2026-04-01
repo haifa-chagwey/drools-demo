@@ -12,8 +12,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "fact_definitions")
-public class Fact {
+@Table(name = "action_definitions")
+public class ActionDefinition {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,17 +25,10 @@ public class Fact {
     @Column(nullable = false)
     private String label;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private FactType type;
-
     private String description;
 
-    @Column(name = "fact_source") // e.g., facts, results, tenantConfigs
-    private String source;
-
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "fact_id")
-    private List<FactAllowedValue> allowedValues;
+    @JoinColumn(name = "action_id")
+    private List<ActionAllowedValue> allowedValues;
 
 }

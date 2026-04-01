@@ -1,6 +1,7 @@
 package com.haifachagwey.ruleengine.service;
 
 import com.haifachagwey.ruleengine.model.Fact;
+import com.haifachagwey.ruleengine.model.FactAllowedValue;
 import com.haifachagwey.ruleengine.model.FactType;
 import com.haifachagwey.ruleengine.repository.FactDefinitionRepository;
 import jakarta.annotation.PostConstruct;
@@ -48,6 +49,18 @@ public class FactDefinitionService {
                     .type(FactType.BOOLEAN)
                     .description("Whether the customer has VIP status")
                     .source("facts")
+                    .build());
+
+            factDefinitionRepository.save(Fact.builder()
+                    .key("productGroup")
+                    .label("Product Group")
+                    .type(FactType.STRING)
+                    .description("The group the product belongs to")
+                    .source("facts")
+                    .allowedValues(List.of(
+                            FactAllowedValue.builder().value("shortparker").build(),
+                            FactAllowedValue.builder().value("contract").build()
+                    ))
                     .build());
         }
     }
