@@ -31,7 +31,7 @@ public class RuleController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteRule(@PathVariable Integer id) {
+    public void deleteRule(@PathVariable Long id) {
         ruleRepository.deleteById(id);
         ruleService.reloadRules();
     }

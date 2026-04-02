@@ -49,15 +49,11 @@ public class RuleService {
     }
 
     private void validateRule(Rule rule) {
-        if (rule.getDefinition() != null && rule.getDefinition().getConditions() != null) {
-            for (RuleCondition condition : rule.getDefinition().getConditions()) {
-                if (condition.getTargetField() != null) {
-                    factDefinitionRepository.findByKey(condition.getTargetField())
-                            .orElseThrow(() -> new IllegalArgumentException("Unknown fact: " + condition.getTargetField()));
-                }
-                if (condition.getValueType() == OperandType.FIELD && condition.getValue() != null) {
-                    factDefinitionRepository.findByKey(condition.getValue())
-                            .orElseThrow(() -> new IllegalArgumentException("Unknown fact in condition value: " + condition.getValue()));
+        if (rule.getConditions() != null) {
+            for (RuleCondition condition : rule.getConditions()) {
+                if (condition.getFactDefinition() != null) {
+                    factDefinitionRepository.findById(condition.getFactDefinition().getId())
+                            .orElseThrow(() -> new IllegalArgumentException("Unknown fact definition ID: " + condition.getFactDefinition().getId()));
                 }
             }
         }

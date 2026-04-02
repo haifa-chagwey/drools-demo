@@ -1,22 +1,42 @@
 package com.haifachagwey.ruleengine.model;
 
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(name = "rule_conditions")
 public class RuleCondition {
 
-    private String targetField;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    private Operator operator; // GREATER_THAN, LESS_THAN, EQUALS, etc.
+    private String operator;
 
-    private OperandType valueType;
+    private String rightOperandType;
 
-    private String value;
+    private String constantValue;
+
+    private String configKey;
+
+    private Integer orderIndex;
+
+    @Builder.Default
+    private boolean enabled = true;
+
+    @ManyToOne
+    @JoinColumn(name = "rule_id")
+    private Rule rule;
+
+    @ManyToOne
+    @JoinColumn(name = "fact_definition_id")
+    private Fact factDefinition;
 
 }

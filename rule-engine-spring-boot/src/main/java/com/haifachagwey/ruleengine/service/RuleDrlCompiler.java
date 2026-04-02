@@ -20,14 +20,15 @@ public class RuleDrlCompiler {
         drl.append("when\n");
         drl.append("    $c : RuleContext(");
 
-        RuleDefinition definition = rule.getDefinition();
-        if (definition != null && definition.getConditions() != null && !definition.getConditions().isEmpty()) {
+        if (rule.getConditions() != null && !rule.getConditions().isEmpty()) {
             List<String> parts = new ArrayList<>();
-            for (RuleCondition condition : definition.getConditions()) {
-                parts.add(compileCondition(condition));
+            for (RuleCondition condition : rule.getConditions()) {
+                if (condition.isEnabled()) {
+                    parts.add(compileCondition(condition));
+                }
             }
-            String joiner = "OR".equalsIgnoreCase(definition.getCombinator()) ? " || " : " && ";
-            drl.append(String.join(joiner, parts));
+            // For simplicity, using AND as default combinator since it's not in the XML
+            drl.append(String.join(" && ", parts));
         } else {
             drl.append("eval(true)");
         }
@@ -35,13 +36,15 @@ public class RuleDrlCompiler {
         drl.append(")\n");
         drl.append("then\n");
 
-        if (definition != null && definition.getActions() != null) {
-            for (RuleAction action : definition.getActions()) {
-                drl.append("    $c.setResult(\"")
-                   .append(action.getOutputKey())
-                   .append("\", \"")
-                   .append(action.getOutputValue())
-                   .append("\");\n");
+        if (rule.getActions() != null) {
+            for (RuleAction action : rule.getActions()) {
+                if (action.isEnabled()) {
+                    drl.append("    $c.setResult(\"")
+                       .append(action.getActionDefinition() != null ? action.getActionDefinition().getKey() : "unknown")
+                       .append("\", \"")
+                       .append(action.getOutputValue())
+                       .append("\");\n");
+                }
             }
         }
 
@@ -51,28 +54,22 @@ public class RuleDrlCompiler {
 
 
     private String compileCondition(RuleCondition condition) {
-        return "facts[\"" + condition.getTargetField() + "\"]"
-                + " " + operatorToExpression(condition.getOperator()) + " "
-                + operandToExpression(condition.getValueType(), condition.getValue());
+        String leftHandSide = "facts[\"" + (condition.getFactDefinition() != null ? condition.getFactDefinition().getKey() : "unknown") + "\"]";
+        String operator = condition.getOperator();
+        String rightHandSide = operandToExpression(condition.getRightOperandType(), condition.getConstantValue(), condition.getConfigKey());
+        
+        return leftHandSide + " " + operator + " " + rightHandSide;
     }
 
-    private String operandToExpression(OperandType type, String value) {
-        return switch (type) {
-            case CONSTANT -> formatConstant(value);
-            case CONFIG -> "tenantConfigs[\"" + value + "\"]";
-            case FIELD -> "facts[\"" + value + "\"]";
-        };
-    }
-
-    private String operatorToExpression(Operator type) {
-        return switch (type) {
-            case GREATER_THAN -> ">";
-            case LESS_THAN -> "<";
-            case GREATER_THAN_OR_EQUAL -> ">=";
-            case LESS_THAN_OR_EQUAL -> "<=";
-            case EQUALS -> "==";
-            case NOT_EQUALS -> "!=";
-        };
+    private String operandToExpression(String type, String constantValue, String configKey) {
+        if ("CONSTANT".equalsIgnoreCase(type)) {
+            return formatConstant(constantValue);
+        } else if ("CONFIG".equalsIgnoreCase(type)) {
+            return "tenantConfigs[\"" + configKey + "\"]";
+        } else if ("FIELD".equalsIgnoreCase(type)) {
+             return "facts[\"" + constantValue + "\"]";
+        }
+        return formatConstant(constantValue);
     }
 
     private String formatConstant(String value) {

@@ -1,12 +1,12 @@
 package com.haifachagwey.ruleengine.model;
 
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -19,31 +19,36 @@ public class Rule {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(unique = true, nullable = false)
     private String name;
 
+    @Builder.Default
     private boolean enabled = true;
 
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "jsonb")
-    private RuleDefinition definition;
+    @OneToMany(mappedBy = "rule", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<RuleCondition> conditions = new ArrayList<>();
 
-    private String dateCreated;
-    private String dateModified;
+    @OneToMany(mappedBy = "rule", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<RuleAction> actions = new ArrayList<>();
+
+    private LocalDateTime createdAt;
+    private LocalDateTime modifiedAt;
     private String createdBy;
     private String modifiedBy;
 
     @PrePersist
     protected void onCreate() {
-        dateCreated = java.time.LocalDateTime.now().toString();
-        dateModified = dateCreated;
+        createdAt = LocalDateTime.now();
+        modifiedAt = createdAt;
     }
 
     @PreUpdate
     protected void onUpdate() {
-        dateModified = java.time.LocalDateTime.now().toString();
+        modifiedAt = LocalDateTime.now();
     }
 
 }
