@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Table(name = "fact_allowed_values")
-public class FactAllowedValue {
+public class FactPropertyAllowedValue {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

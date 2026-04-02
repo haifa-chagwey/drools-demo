@@ -5,9 +5,18 @@ import java.util.Map;
 
 public class RuleContext {
 
-    private final Map<String, Object> facts = new HashMap<>();
-    private final Map<String, Object> results = new HashMap<>();
-    private final Map<String, Object> tenantConfigs = new HashMap<>();
+    private Map<String, Object> facts;
+    private Map<String, Object> results;
+    private Map<String, Object> tenantConfigs;
+
+    public RuleContext() {}
+
+    public RuleContext(Map<String, Object> facts, Map<String, Object> results, Map<String, Object> tenantConfigs) {
+        this.facts = facts;
+        this.results = results;
+        this.tenantConfigs = tenantConfigs;
+    }
+
 
     public Object getFact(String key) { return facts.get(key); }
     public void setFact(String key, Object value) { facts.put(key, value); }

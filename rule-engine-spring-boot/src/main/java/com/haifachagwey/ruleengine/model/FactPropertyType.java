@@ -4,13 +4,13 @@ import java.util.List;
 
 import static com.haifachagwey.ruleengine.model.Operator.*;
 
-public enum FactType {
+public enum FactPropertyType {
     STRING (List.of(EQUALS, NOT_EQUALS)),
     NUMBER (List.of(GREATER_THAN, LESS_THAN, GREATER_THAN_OR_EQUAL, LESS_THAN_OR_EQUAL, EQUALS, NOT_EQUALS)),
     BOOLEAN (List.of(EQUALS, NOT_EQUALS)),
     DATE (List.of(GREATER_THAN, LESS_THAN, GREATER_THAN_OR_EQUAL, LESS_THAN_OR_EQUAL, EQUALS, NOT_EQUALS)),
     ENUM (List.of(EQUALS, NOT_EQUALS));
 
-    FactType(List<Operator> operators) {
+    FactPropertyType(List<Operator> operators) {
     }
 }

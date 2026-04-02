@@ -20,6 +20,8 @@ public class RuleAction {
 
     private String outputValue;
 
+    private String outputKey;
+
     private String valueType;
 
     private Integer orderIndex;

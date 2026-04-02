@@ -24,6 +24,11 @@ public class Rule {
     @Column(unique = true, nullable = false)
     private String name;
 
+    private String description;
+
+    @Column(columnDefinition = "TEXT")
+    private String drl;
+
     @Builder.Default
     private boolean enabled = true;
 

@@ -1,7 +1,6 @@
 package com.haifachagwey.ruleengine.controller;
 
 import com.haifachagwey.ruleengine.model.Rule;
-import com.haifachagwey.ruleengine.repository.RuleRepository;
 import com.haifachagwey.ruleengine.service.RuleService;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,17 +11,15 @@ import java.util.List;
 @RequestMapping("/api/admin/rules")
 public class RuleController {
 
-    private final RuleRepository ruleRepository;
     private final RuleService ruleService;
 
-    public RuleController(RuleRepository ruleRepository, RuleService ruleService) {
-        this.ruleRepository = ruleRepository;
+    public RuleController(RuleService ruleService) {
         this.ruleService = ruleService;
     }
 
     @GetMapping
     public List<Rule> getAllRules() {
-        return ruleRepository.findAll();
+        return ruleService.getAllRules();
     }
 
     @PostMapping
@@ -32,8 +29,7 @@ public class RuleController {
 
     @DeleteMapping("/{id}")
     public void deleteRule(@PathVariable Long id) {
-        ruleRepository.deleteById(id);
-        ruleService.reloadRules();
+        ruleService.deleteRule(id);
     }
 
     @PostMapping("/reload")

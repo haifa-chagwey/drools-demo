@@ -1,10 +1,11 @@
 package com.haifachagwey.ruleengine.service;
 
 import com.haifachagwey.ruleengine.model.*;
-import com.haifachagwey.ruleengine.repository.FactDefinitionRepository;
+import com.haifachagwey.ruleengine.repository.FactPropertyRepository;
 import com.haifachagwey.ruleengine.repository.RuleRepository;
 import com.haifachagwey.ruleengine.repository.TenantConfigRepository;
 import jakarta.annotation.PostConstruct;
+import jakarta.transaction.Transactional;
 import org.kie.api.KieServices;
 import org.kie.api.builder.KieBuilder;
 import org.kie.api.builder.KieFileSystem;
@@ -23,15 +24,15 @@ public class RuleService {
     private final TenantConfigRepository tenantConfigRepository;
     private final KieServices kieServices;
     private final RuleDrlCompiler ruleDrlCompiler;
-    private final FactDefinitionRepository factDefinitionRepository;
+    private final FactPropertyRepository factPropertyRepository;
     private KieContainer kieContainer;
 
-    public RuleService(RuleRepository ruleRepository, TenantConfigRepository tenantConfigRepository, KieServices kieServices, RuleDrlCompiler ruleDrlCompiler, FactDefinitionRepository factDefinitionRepository) {
+    public RuleService(RuleRepository ruleRepository, TenantConfigRepository tenantConfigRepository, KieServices kieServices, RuleDrlCompiler ruleDrlCompiler, FactPropertyRepository factPropertyRepository) {
         this.ruleRepository = ruleRepository;
         this.tenantConfigRepository = tenantConfigRepository;
         this.kieServices = kieServices;
         this.ruleDrlCompiler = ruleDrlCompiler;
-        this.factDefinitionRepository = factDefinitionRepository;
+        this.factPropertyRepository = factPropertyRepository;
     }
 
 //    Rule Management
@@ -48,17 +49,27 @@ public class RuleService {
         return saved;
     }
 
+    public List<Rule> getAllRules() {
+        return ruleRepository.findAll();
+    }
+
+    public void deleteRule(Long id) {
+        ruleRepository.deleteById(id);
+        reloadRules();
+    }
+
     private void validateRule(Rule rule) {
         if (rule.getConditions() != null) {
             for (RuleCondition condition : rule.getConditions()) {
-                if (condition.getFactDefinition() != null) {
-                    factDefinitionRepository.findById(condition.getFactDefinition().getId())
-                            .orElseThrow(() -> new IllegalArgumentException("Unknown fact definition ID: " + condition.getFactDefinition().getId()));
+                if (condition.getFactPropertyDefinition() != null) {
+                    factPropertyRepository.findById(condition.getFactPropertyDefinition().getId())
+                            .orElseThrow(() -> new IllegalArgumentException("Unknown fact definition ID: " + condition.getFactPropertyDefinition().getId()));
                 }
             }
         }
     }
 
+    @Transactional
     public synchronized void reloadRules() {
         KieFileSystem kieFileSystem = kieServices.newKieFileSystem();
         List<Rule> rules = ruleRepository.findAll();
@@ -78,14 +89,11 @@ public class RuleService {
 //    Rule Execution
 
     public Map<String, Object> executeRules(Map<String, Object> input, String tenantId) {
+        if (kieContainer == null) {
+            reloadRules();
+        }
         KieSession kieSession = kieContainer.newKieSession();
 
-//        Create a new context
-        RuleContext ruleContext = new RuleContext();
-//        Insert facts into context
-        ruleContext.setFacts(input);
-
-//        Prepare tenant configs and insert into context
         Map<String, Object> mergedConfigs = new HashMap<>();
         tenantConfigRepository.findByTenantId("GLOBAL")
                 .forEach(c -> mergedConfigs.put(c.getConfigKey(), c.getConfigValue()));
@@ -93,8 +101,14 @@ public class RuleService {
             tenantConfigRepository.findByTenantId(tenantId)
                     .forEach(c -> mergedConfigs.put(c.getConfigKey(), c.getConfigValue()));
         }
+
+        Map<String, Object> results = new HashMap<>();
+
+        RuleContext ruleContext = new RuleContext();
+        ruleContext.setFacts(input);
         ruleContext.setTenantConfig(mergedConfigs);
-//        Execute rules
+        ruleContext.setResults(results);
+
         kieSession.insert(ruleContext);
         kieSession.fireAllRules();
         kieSession.dispose();

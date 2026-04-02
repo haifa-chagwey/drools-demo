@@ -10,10 +10,15 @@ import java.util.List;
 public class RuleDrlCompiler {
 
     public String compile(Rule rule) {
+        if (rule.getDrl() != null && !rule.getDrl().isEmpty()) {
+            return rule.getDrl();
+        }
         StringBuilder drl = new StringBuilder();
 
         drl.append("package rules;\n");
         drl.append("import com.haifachagwey.ruleengine.model.RuleContext;\n");
+        drl.append("global java.util.Map output;\n");
+        drl.append("global java.util.Map tenantConfigs;\n");
         drl.append("dialect \"mvel\"\n\n");
 
         drl.append("rule \"").append(rule.getName()).append("\"\n");
@@ -27,8 +32,11 @@ public class RuleDrlCompiler {
                     parts.add(compileCondition(condition));
                 }
             }
-            // For simplicity, using AND as default combinator since it's not in the XML
-            drl.append(String.join(" && ", parts));
+            if (parts.isEmpty()) {
+                drl.append("eval(true)");
+            } else {
+                drl.append(String.join(" && ", parts));
+            }
         } else {
             drl.append("eval(true)");
         }
@@ -39,11 +47,17 @@ public class RuleDrlCompiler {
         if (rule.getActions() != null) {
             for (RuleAction action : rule.getActions()) {
                 if (action.isEnabled()) {
+                    String key = "unknown";
+                    if (action.getActionDefinition() != null) {
+                        key = action.getActionDefinition().getKey();
+                    } else if (action.getOutputKey() != null) {
+                        key = action.getOutputKey();
+                    }
                     drl.append("    $c.setResult(\"")
-                       .append(action.getActionDefinition() != null ? action.getActionDefinition().getKey() : "unknown")
-                       .append("\", \"")
-                       .append(action.getOutputValue())
-                       .append("\");\n");
+                       .append(key)
+                       .append("\", ")
+                       .append(formatConstant(action.getOutputValue(), action.getValueType()))
+                       .append(");\n");
                 }
             }
         }
@@ -54,33 +68,47 @@ public class RuleDrlCompiler {
 
 
     private String compileCondition(RuleCondition condition) {
-        String leftHandSide = "facts[\"" + (condition.getFactDefinition() != null ? condition.getFactDefinition().getKey() : "unknown") + "\"]";
-        String operator = condition.getOperator();
-        String rightHandSide = operandToExpression(condition.getRightOperandType(), condition.getConstantValue(), condition.getConfigKey());
-        
-        return leftHandSide + " " + operator + " " + rightHandSide;
-    }
-
-    private String operandToExpression(String type, String constantValue, String configKey) {
-        if ("CONSTANT".equalsIgnoreCase(type)) {
-            return formatConstant(constantValue);
-        } else if ("CONFIG".equalsIgnoreCase(type)) {
-            return "tenantConfigs[\"" + configKey + "\"]";
-        } else if ("FIELD".equalsIgnoreCase(type)) {
-             return "facts[\"" + constantValue + "\"]";
+        String leftHandSide;
+        if (condition.getFactPropertyDefinition() != null) {
+            leftHandSide = "facts[\"" + condition.getFactPropertyDefinition().getKey() + "\"]";
+        } else if (condition.getFieldName() != null) {
+            leftHandSide = "facts[\"" + condition.getFieldName() + "\"]";
+        } else {
+            leftHandSide = "eval(true)"; // Or some default
         }
-        return formatConstant(constantValue);
+
+        String operator = condition.getOperator();
+        String rightHandSide = operandToExpression(condition);
+        
+        return leftHandSide + " " + (operator != null ? operator : "==") + " " + rightHandSide;
     }
 
-    private String formatConstant(String value) {
+    private String operandToExpression(RuleCondition condition) {
+        String type = condition.getRightOperandType();
+        if ("CONSTANT".equalsIgnoreCase(type)) {
+            return formatConstant(condition.getConstantValue(), null);
+        } else if ("CONFIG".equalsIgnoreCase(type)) {
+            return "tenantConfigs[\"" + condition.getConfigKey() + "\"]";
+        } else if ("FIELD".equalsIgnoreCase(type)) {
+             return "facts[\"" + condition.getConstantValue() + "\"]";
+        } else if (condition.getThresholdKey() != null) {
+            return "tenantConfigs[\"" + condition.getThresholdKey() + "\"]";
+        }
+        return formatConstant(condition.getConstantValue(), null);
+    }
+
+    private String formatConstant(String value, String valueType) {
         if (value == null) return "null";
         if ("true".equalsIgnoreCase(value) || "false".equalsIgnoreCase(value)) {
-            return value.toLowerCase();
+            return "\"" + value.toLowerCase() + "\"";
+        }
+        if ("Integer".equalsIgnoreCase(valueType) || "Double".equalsIgnoreCase(valueType) || "Long".equalsIgnoreCase(valueType)) {
+            return value;
         }
         try {
             Double.parseDouble(value);
             return value;
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
             return "\"" + value.replace("\"", "\\\"") + "\"";
         }
     }

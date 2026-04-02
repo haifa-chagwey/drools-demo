@@ -20,6 +20,12 @@ public class RuleCondition {
 
     private String operator;
 
+    private String fieldName;
+
+    private String thresholdKey;
+
+    private String thresholdType;
+
     private String rightOperandType;
 
     private String constantValue;
@@ -37,6 +43,6 @@ public class RuleCondition {
 
     @ManyToOne
     @JoinColumn(name = "fact_definition_id")
-    private Fact factDefinition;
+    private FactProperty factPropertyDefinition;
 
 }
