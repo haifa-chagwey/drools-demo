@@ -11,12 +11,13 @@ rule "Contract parker expired - direct payment"
 salience 30
 when
     $c : RuleContext(
-        facts["productGroup"] == "CONTRACT" &&
-        facts["expired"] == true &&
-        facts["amount"] > tenantConfigs["mediumAmountThreshold"]
+        inputs["deviceType"] == "EXIT" &&
+        inputs["productGroup"] == "CONTRACT" &&
+        inputs["productExpired"] == true &&
+        inputs["amount"] > configs["mediumAmountThreshold"]
     )
 then
-    $c.setResult("action", "DIRECT_PAYMENT");
+    $c.setOutput("action", "DIRECT_PAYMENT");
     System.out.println("Direct payment required");
 end
 
@@ -27,14 +28,15 @@ rule "Contract parker expired - later payment"
 salience 20
 when
     $c : RuleContext(
-        facts["productGroup"] == "CONTRACT" &&
-        facts["expired"] == true &&
-        facts["amount"] > tenantConfigs["lowAmountThreshold"] &&
-        facts["amount"] <= tenantConfigs["mediumAmountThreshold"]
+        inputs["deviceType"] == "EXIT" &&
+        inputs["productGroup"] == "CONTRACT" &&
+        inputs["productExpired"] == true &&
+        inputs["amount"] > configs["lowAmountThreshold"] &&
+        inputs["amount"] <= configs["mediumAmountThreshold"]
     )
 then
-    $c.setResult("action", "LATER_PAYMENT");
-    $c.setResult("openBarrier", true);
+    $c.setOutput("Book amount", "LATER_PAYMENT");
+    $c.setOutput("openBarrier", true);
 end
 
 //////////////////////////////////////////////////////
@@ -44,11 +46,12 @@ rule "Contract parker expired - lost revenue"
 salience 10
 when
     $c : RuleContext(
-        facts["productGroup"] == "CONTRACT" &&
-        facts["expired"] == true &&
-        facts["amount"] <= tenantConfigs["lowAmountThreshold"]
+        inputs["deviceType"] == "EXIT" &&
+        inputs["productGroup"] == "CONTRACT" &&
+        inputs["productExpired"] == true &&
+        inputs["amount"] <= configs["lowAmountThreshold"]
     )
 then
-    $c.setResult("action", "LOST_REVENUE");
-    $c.setResult("openBarrier", true);
+    $c.setOutput("action", "LOST_REVENUE");
+    $c.setOutput("openBarrier", true);
 end

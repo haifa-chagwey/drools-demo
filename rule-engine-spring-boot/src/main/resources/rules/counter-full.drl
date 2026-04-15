@@ -14,7 +14,7 @@ when
         facts["deviceType"] == "ENTRY"
     )
 then
-    $c.setResult("action", "INTERCOM");
+    $c.setOutput("action", "INTERCOM");
     System.out.println("Counter issue → operator");
 end
 
@@ -30,8 +30,8 @@ when
         facts["counterMode"] == "NORMAL"
     )
 then
-    $c.setResult("action", "OPEN_BARRIER");
-    $c.setResult("counterAction", "OVERBOOK");
+    $c.setOutput("action", "OPEN_BARRIER");
+    $c.setOutput("counterAction", "OVERBOOK");
     System.out.println("Counter full → overbook");
 end
 
@@ -47,7 +47,7 @@ when
         facts["carParkFull"] == true
     )
 then
-    $c.setResult("action", "INTERCOM");
+    $c.setOutput("action", "INTERCOM");
     System.out.println("Car park full → stop customer");
 end
 
@@ -62,6 +62,6 @@ when
         facts["counterState"] == "BLOCKED"
     )
 then
-    $c.setResult("action", "INTERCOM");
+    $c.setOutput("action", "INTERCOM");
     System.out.println("Counter blocked → stop customer");
 end

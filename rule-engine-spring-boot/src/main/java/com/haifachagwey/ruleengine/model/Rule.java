@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "rules")
+@Table(name = "rule")
 public class Rule {
 
     @Id
@@ -25,6 +25,10 @@ public class Rule {
     private String name;
 
     private String description;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "fact_id")
+    private FactType factType;
 
     @Column(columnDefinition = "TEXT")
     private String drl;

@@ -1,17 +1,13 @@
 package com.haifachagwey.ruleengine;
 
 import com.haifachagwey.ruleengine.model.Rule;
-import com.haifachagwey.ruleengine.model.RuleAction;
-import com.haifachagwey.ruleengine.model.RuleCondition;
 import com.haifachagwey.ruleengine.repository.RuleRepository;
 import com.haifachagwey.ruleengine.service.RuleService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

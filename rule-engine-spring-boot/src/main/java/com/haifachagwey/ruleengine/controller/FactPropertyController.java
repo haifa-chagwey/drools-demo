@@ -1,7 +1,7 @@
 package com.haifachagwey.ruleengine.controller;
 
 import com.haifachagwey.ruleengine.model.FactProperty;
-import com.haifachagwey.ruleengine.service.FactPropertyService;
+import com.haifachagwey.ruleengine.service.FactService;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -10,24 +10,29 @@ import java.util.List;
 @RequestMapping("/api/admin/facts")
 public class FactPropertyController {
 
-    private final FactPropertyService factPropertyService;
+    private final FactService factService;
 
-    public FactPropertyController(FactPropertyService factPropertyService) {
-        this.factPropertyService = factPropertyService;
+    public FactPropertyController(FactService factService) {
+        this.factService = factService;
     }
 
     @GetMapping
     public List<FactProperty> getAllFacts() {
-        return factPropertyService.getAllFacts();
+        return factService.getAllProperties();
+    }
+
+    @GetMapping("/by-fact/{factId}")
+    public List<FactProperty> getPropertiesByFactId(@PathVariable Integer factId) {
+        return factService.getPropertiesByFactTypeId(factId);
     }
 
     @PostMapping
     public FactProperty addFact(@RequestBody FactProperty factProperty) {
-        return factPropertyService.saveFact(factProperty);
+        return factService.saveProperty(factProperty);
     }
 
     @DeleteMapping("/{id}")
     public void deleteFact(@PathVariable Integer id) {
-        factPropertyService.deleteFact(id);
+        factService.deleteProperty(id);
     }
 }

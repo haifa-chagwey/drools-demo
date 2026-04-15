@@ -1,12 +1,12 @@
 package com.haifachagwey.ruleengine.repository;
 
-import com.haifachagwey.ruleengine.model.ActionProperty;
+import com.haifachagwey.ruleengine.model.ActionType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public interface ActionDefinitionRepository extends JpaRepository<ActionProperty, Integer> {
-    Optional<ActionProperty> findByKey(String key);
+public interface ActionTypeRepository extends JpaRepository<ActionType, Integer> {
+    Optional<ActionType> findByName(String name);
 }

@@ -1,0 +1,101 @@
+package com.scheidt_bachmann.parking.exceptions
+
+import com.scheidt_bachmann.parking.model.ParkingEvent;
+import com.scheidt_bachmann.parking.model.ExceptionResult;
+import com.scheidt_bachmann.parking.model.ProductGroup;
+import com.scheidt_bachmann.parking.model.DeviceType;
+
+// ============================================================
+// Use-case 3: Manage wrong presence at entry & exit
+//
+// ENTRY - Tolerate wrong presence:
+// Rule 1: Employee, wrong presence AND duration since last entry >= 24h
+//   -> true:  create virtual trx from last trx (+1s) + notify + proceed
+//   -> false: proceed to rule 2
+// Rule 2: Employee, wrong presence
+//   -> true:  notify + trigger intercom call
+//   -> false: proceed to rule 3
+// Rule 3: Short term, wrong presence
+//   -> true:  close previous open transaction + proceed with regular handling
+//
+// EXIT - Tolerate wrong presence:
+// Rule 1: All products, wrong presence
+//   -> true:  create virtual entry transaction + notify + proceed
+// ============================================================
+
+// ---- ENTRY rules ----
+
+rule "UC3-Entry-Rule1: Wrong presence employee - duration >= 24h"
+    salience 30
+    when
+        $event : ParkingEvent(
+            deviceType == DeviceType.ENTRY,
+            productGroup == ProductGroup.EMPLOYEE,
+            wrongPresence == true,
+            durationSinceLastEntryMinutes >= 1440
+        )
+        $result : ExceptionResult(exceptionName == "TolerateWrongPresenceAtEntry")
+    then
+        $result.addAction("CREATE_VIRTUAL_TRX_FROM_LAST_TRX_PLUS_1S");
+        $result.addAction("SYSTEM_NOTIFICATION_EXCEPTION_WIDGET_AND_GLOBAL");
+        $result.addAction("PROCEED_WITH_REGULAR_HANDLING");
+        $result.setHandled(true);
+        update($result);
+end
+
+rule "UC3-Entry-Rule2: Wrong presence employee - general"
+    salience 20
+    when
+        $event : ParkingEvent(
+            deviceType == DeviceType.ENTRY,
+            productGroup == ProductGroup.EMPLOYEE,
+            wrongPresence == true,
+            durationSinceLastEntryMinutes < 1440
+        )
+        $result : ExceptionResult(
+            exceptionName == "TolerateWrongPresenceAtEntry",
+            handled == false
+        )
+    then
+        $result.addAction("SYSTEM_NOTIFICATION_EXCEPTION_WIDGET_AND_GLOBAL");
+        $result.addAction("TRIGGER_AUTOMATED_INTERCOM_CALL");
+        $result.setHandled(true);
+        update($result);
+end
+
+rule "UC3-Entry-Rule3: Wrong presence short term"
+    salience 10
+    when
+        $event : ParkingEvent(
+            deviceType == DeviceType.ENTRY,
+            productGroup == ProductGroup.SHORT_TERM,
+            wrongPresence == true
+        )
+        $result : ExceptionResult(
+            exceptionName == "TolerateWrongPresenceAtEntry",
+            handled == false
+        )
+    then
+        $result.addAction("CLOSE_PREVIOUS_OPEN_TRANSACTION");
+        $result.addAction("PROCEED_WITH_REGULAR_HANDLING");
+        $result.setHandled(true);
+        update($result);
+end
+
+// ---- EXIT rules ----
+
+rule "UC3-Exit-Rule1: Wrong presence at exit - all products"
+    salience 10
+    when
+        $event : ParkingEvent(
+            deviceType == DeviceType.EXIT,
+            wrongPresence == true
+        )
+        $result : ExceptionResult(exceptionName == "TolerateWrongPresenceAtExit")
+    then
+        $result.addAction("CREATE_VIRTUAL_ENTRY_TRANSACTION");
+        $result.addAction("SYSTEM_NOTIFICATION_EXCEPTION_WIDGET_AND_GLOBAL");
+        $result.addAction("PROCEED_WITH_REGULAR_HANDLING");
+        $result.setHandled(true);
+        update($result);
+end

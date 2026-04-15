@@ -1,7 +1,6 @@
 package com.haifachagwey.ruleengine.model;
 
 import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -15,8 +14,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "fact_property")
-public class FactProperty {
+@Table(name = "action_property")
+public class ActionProperty {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,12 +34,12 @@ public class FactProperty {
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fact_type_id")
+    @JoinColumn(name = "action_type_id")
     @JsonBackReference
-    private FactType factType;
+    private ActionType actionType;
 
-    @OneToMany(mappedBy = "factProperty", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "actionProperty", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
-    private List<FactPropertyAllowedValue> allowedValues;
+    private List<ActionPropertyAllowedValue> allowedValues;
 
 }

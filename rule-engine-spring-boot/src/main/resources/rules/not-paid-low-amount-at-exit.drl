@@ -11,16 +11,16 @@ rule "Night - low amount tolerated"
 salience 100
 when
     $c : RuleContext(
-        facts["deviceType"] == "EXIT" &&
-        facts["amount"] <= tenantConfigs["nightLowAmountThreshold"] &&
+        inputs["deviceType"] == "EXIT" &&
+        inputs["amount"] <= configs["nightLowAmountThreshold"] &&
         (
-            facts["exitTime"] >= "19:00" ||
-            facts["exitTime"] <= "06:00"
+            inputs["exitTime"] >= "19:00" ||
+            inputs["exitTime"] <= "06:00"
         )
     )
 then
-    $c.setResult("action", "OPEN_BARRIER");
-    $c.setResult("financialAction", "LOST_REVENUE");
+    $c.setOutput("action", "OPEN_BARRIER");
+    $c.setOutput("financialAction", "LOST_REVENUE");
     System.out.println("Night + low amount → open barrier, lost revenue");
 end
 
@@ -31,18 +31,18 @@ rule "Night - condition false"
 salience 90
 when
     $c : RuleContext(
-        facts["deviceType"] == "EXIT" &&
+        inputs["deviceType"] == "EXIT" &&
         !(
-            facts["amount"] <= tenantConfigs["nightLowAmountThreshold"] &&
+            inputs["amount"] <= configs["nightLowAmountThreshold"] &&
             (
-                facts["exitTime"] >= "19:00" ||
-                facts["exitTime"] <= "06:00"
+                inputs["exitTime"] >= "19:00" ||
+                inputs["exitTime"] <= "06:00"
             )
         )
     )
 then
-    $c.setResult("action", "INTERCOM");
-    $c.setResult("financialAction", "DIRECT_PAYMENT");
+    $c.setOutput("action", "INTERCOM");
+    $c.setOutput("financialAction", "DIRECT_PAYMENT");
     System.out.println("Night condition not met → intercom + direct payment");
 end
 
@@ -54,11 +54,11 @@ rule "Exit - default requires operator"
 salience 50
 when
     $c : RuleContext(
-        facts["deviceType"] == "EXIT"
+        inputs["deviceType"] == "EXIT"
     )
 then
-    $c.setResult("action", "INTERCOM");
-    $c.setResult("financialAction", "DIRECT_PAYMENT");
+    $c.setOutput("action", "INTERCOM");
+    $c.setOutput("financialAction", "DIRECT_PAYMENT");
     System.out.println("Default: operator handling required");
 end
 //////////////////////////////////////////////////////
@@ -69,14 +69,14 @@ rule "Registered - auto handling valid contract"
 salience 40
 when
     $c : RuleContext(
-        facts["deviceType"] == "EXIT" &&
-        facts["productGroup"] == "REGISTERED" &&
-        facts["validContract"] == true &&
-        facts["amount"] < tenantConfigs["registeredMaxAmount"]
+        inputs["deviceType"] == "EXIT" &&
+        inputs["productGroup"] == "REGISTERED" &&
+        inputs["validContract"] == true &&
+        inputs["amount"] < configs["registeredMaxAmount"]
     )
 then
-    $c.setResult("action", "OPEN_BARRIER");
-    $c.setResult("financialAction", "EXCEPTIONAL_EXIT");
+    $c.setOutput("action", "OPEN_BARRIER");
+    $c.setOutput("financialAction", "EXCEPTIONAL_EXIT");
     System.out.println("Registered customer: open barrier, no charge");
 end
 
@@ -88,14 +88,14 @@ rule "Short term - low amount - no fuzzy match"
 salience 30
 when
     $c : RuleContext(
-        facts["deviceType"] == "EXIT" &&
-        facts["productGroup"] == "SHORT_TERM" &&
-        facts["amount"] < tenantConfigs["lowAmountThreshold"] &&
-        facts["fuzzyMatchFound"] == false
+        inputs["deviceType"] == "EXIT" &&
+        inputs["productGroup"] == "SHORT_TERM" &&
+        inputs["amount"] < configs["lowAmountThreshold"] &&
+        inputs["fuzzyMatchFound"] == false
     )
 then
-    $c.setResult("action", "OPEN_BARRIER");
-    $c.setResult("financialAction", "LOST_REVENUE");
+    $c.setOutput("action", "OPEN_BARRIER");
+    $c.setOutput("financialAction", "LOST_REVENUE");
     System.out.println("Low amount + no fuzzy match → lost revenue");
 end
 //////////////////////////////////////////////////////
@@ -105,14 +105,14 @@ rule "Short term - fuzzy match unique"
 salience 20
 when
     $c : RuleContext(
-        facts["deviceType"] == "EXIT" &&
-        facts["productGroup"] == "SHORT_TERM" &&
-        facts["fuzzyMatchFound"] == true &&
-        facts["uniqueFuzzyMatch"] == true
+        inputs["deviceType"] == "EXIT" &&
+        inputs["productGroup"] == "SHORT_TERM" &&
+        inputs["fuzzyMatchFound"] == true &&
+        inputs["uniqueFuzzyMatch"] == true
     )
 then
-    $c.setResult("action", "OPEN_BARRIER");
-    $c.setResult("financialAction", "MATCH_PAYMENT");
+    $c.setOutput("action", "OPEN_BARRIER");
+    $c.setOutput("financialAction", "MATCH_PAYMENT");
     System.out.println("Fuzzy match found and unique → match payment");
 end
 
@@ -123,13 +123,13 @@ end
 rule "Short term - high amount unpaid"
 salience 10
 when
-    $c : RuleContext(
-        facts["deviceType"] == "EXIT" &&
-        facts["productGroup"] == "SHORT_TERM" &&
-        facts["amount"] > tenantConfigs["highAmountThreshold"]
+    $rc : RuleContext(
+        inputs["deviceType"] == "EXIT" &&
+        inputs["productGroup"] == "SHORT_TERM" &&
+        inputs["amount"] > configs["highAmountThreshold"]
     )
 then
-    $c.setResult("action", "INTERCOM");
-    $c.setResult("financialAction", "EXCEPTION");
+    $rc.setOutput("action", "INTERCOM");
+    $rc.setOutput("financialAction", "EXCEPTION");
     System.out.println("High amount → manual handling required");
 end

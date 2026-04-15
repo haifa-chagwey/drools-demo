@@ -1,8 +1,11 @@
 package com.haifachagwey.ruleengine.service;
 
-import com.haifachagwey.ruleengine.model.ActionDefinition;
-import com.haifachagwey.ruleengine.model.ActionAllowedValue;
+import com.haifachagwey.ruleengine.model.ActionProperty;
+import com.haifachagwey.ruleengine.model.ActionPropertyAllowedValue;
+import com.haifachagwey.ruleengine.model.ActionType;
+import com.haifachagwey.ruleengine.model.FactPropertyType;
 import com.haifachagwey.ruleengine.repository.ActionDefinitionRepository;
+import com.haifachagwey.ruleengine.repository.ActionTypeRepository;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
 
@@ -13,47 +16,94 @@ import java.util.Optional;
 public class ActionDefinitionService {
 
     private final ActionDefinitionRepository actionDefinitionRepository;
+    private final ActionTypeRepository actionTypeRepository;
 
-    public ActionDefinitionService(ActionDefinitionRepository actionDefinitionRepository) {
+    public ActionDefinitionService(ActionDefinitionRepository actionDefinitionRepository, ActionTypeRepository actionTypeRepository) {
         this.actionDefinitionRepository = actionDefinitionRepository;
+        this.actionTypeRepository = actionTypeRepository;
     }
 
     @PostConstruct
     public void init() {
+        if (actionTypeRepository.count() == 0) {
+            ActionType financial = ActionType.builder()
+                    .name("Financial")
+                    .description("Financial related actions")
+                    .build();
+            ActionType hardware = ActionType.builder()
+                    .name("Hardware")
+                    .description("Hardware related actions")
+                    .build();
+            actionTypeRepository.saveAll(List.of(financial, hardware));
+        }
+
         if (actionDefinitionRepository.count() == 0) {
-            actionDefinitionRepository.save(ActionDefinition.builder()
+            ActionType financial = actionTypeRepository.findByName("Financial").orElse(null);
+            ActionType hardware = actionTypeRepository.findByName("Hardware").orElse(null);
+
+            ActionProperty bookAmount = ActionProperty.builder()
                     .key("BOOK_AMOUNT")
                     .label("Book Amount")
+                    .type(FactPropertyType.ENUM)
                     .description("The action to book an amount")
-                    .allowedValues(List.of(
-                            ActionAllowedValue.builder().value("DIRECT_PAYMENT").build(),
-                            ActionAllowedValue.builder().value("LOST_REVENUE").build(),
-                            ActionAllowedValue.builder().value("LATER_PAYMENT").build()
-                    ))
-                    .build());
+                    .actionType(financial)
+                    .build();
 
-            actionDefinitionRepository.save(ActionDefinition.builder()
+            ActionPropertyAllowedValue v1 = ActionPropertyAllowedValue.builder()
+                    .value("DIRECT_PAYMENT")
+                    .actionProperty(bookAmount) // 🔥 REQUIRED
+                    .build();
+
+            ActionPropertyAllowedValue v2 = ActionPropertyAllowedValue.builder()
+                    .value("LOST_REVENUE")
+                    .actionProperty(bookAmount)
+                    .build();
+
+            ActionPropertyAllowedValue v3 = ActionPropertyAllowedValue.builder()
+                    .value("LATER_PAYMENT")
+                    .actionProperty(bookAmount)
+                    .build();
+            bookAmount.setAllowedValues(List.of(v1, v2, v3));
+            actionDefinitionRepository.save(bookAmount);
+
+            ActionProperty openBarrier = ActionProperty.builder()
                     .key("openBarrier")
                     .label("Open Barrier")
+                    .type(FactPropertyType.BOOLEAN)
                     .description("The action to open the barrier")
-                    .allowedValues(List.of(
-                            ActionAllowedValue.builder().value("true").build(),
-                            ActionAllowedValue.builder().value("false").build()
-                    ))
-                    .build());
+                    .actionType(hardware)
+                    .build();
+
+            ActionPropertyAllowedValue b1 = ActionPropertyAllowedValue.builder()
+                    .value("true")
+                    .actionProperty(openBarrier)
+                    .build();
+
+            ActionPropertyAllowedValue b2 = ActionPropertyAllowedValue.builder()
+                    .value("false")
+                    .actionProperty(openBarrier)
+                    .build();
+
+            openBarrier.setAllowedValues(List.of(b1, b2));
+
+            actionDefinitionRepository.save(openBarrier);
         }
     }
 
-    public List<ActionDefinition> getAllActions() {
+    public List<ActionProperty> getAllActions() {
         return actionDefinitionRepository.findAll();
     }
 
-    public Optional<ActionDefinition> getActionByKey(String key) {
+    public Optional<ActionProperty> getActionByKey(String key) {
         return actionDefinitionRepository.findByKey(key);
     }
 
-    public ActionDefinition saveAction(ActionDefinition actionDefinition) {
-        return actionDefinitionRepository.save(actionDefinition);
+    public ActionProperty saveAction(ActionProperty actionProperty) {
+        return actionDefinitionRepository.save(actionProperty);
+    }
+
+    public List<ActionType> getAllActionTypes() {
+        return actionTypeRepository.findAll();
     }
 
     public void deleteAction(Integer id) {

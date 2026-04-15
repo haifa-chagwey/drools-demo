@@ -1,0 +1,169 @@
+package com.scheidt_bachmann.parking.exceptions
+
+import com.scheidt_bachmann.parking.model.ParkingEvent;
+import com.scheidt_bachmann.parking.model.Transaction;
+import com.scheidt_bachmann.parking.model.ExceptionResult;
+import com.scheidt_bachmann.parking.model.ProductGroup;
+import com.scheidt_bachmann.parking.model.DeviceType;
+import java.time.LocalTime;
+
+// ============================================================
+// Use-case 2: Tolerate not paid with low amount at exit during night
+// Night window: 19:00 - 06:00
+//
+// Rule ID 1: amount <= 1 EUR AND time in 19:00-06:00
+//   -> true:  book as lost revenue + open barrier
+//   -> false: trigger automated intercom call + book for direct payment
+//
+// General "Tolerate not paid at exit" rules (updated general rules):
+// Rule ID 1: any product -> operator must handle (fire exception)
+//   -> false: proceed to rule 2
+// Rule ID 2: registered, valid contract, unpaid < 6 EUR, any payment type
+//   -> true:  open barrier + book exit trx with exceptional product (price = 0)
+//   -> false: proceed to rule 3
+// Rule ID 3: short term, unpaid < 5 EUR, fuzzy n-2 NOT found
+//   -> true:  book as lost revenue + open barrier
+//   -> false: proceed to rule 4
+// Rule ID 4: short term, fuzzy n-2 found, no other car with fuzzy n-2
+//   -> true:  match honest payment + open barrier
+//   -> false: proceed to rule 5
+// Rule ID 5: short term, price > 5 EUR
+//   -> true:  stop customer + fire not paid exception
+// ============================================================
+
+rule "UC2-Rule1: Low amount at exit during night - tolerated"
+    salience 50
+    when
+        $event : ParkingEvent(
+            deviceType == DeviceType.EXIT,
+            openAmount <= 1.0,
+            eventTime after LocalTime.of(19, 0) || eventTime before LocalTime.of(6, 0)
+        )
+        $result : ExceptionResult(exceptionName == "LowAmountAtExitDuringNight")
+    then
+        $result.addAction("BOOK_AMOUNT_AS_LOST_REVENUE");
+        $result.addAction("OPEN_BARRIER");
+        $result.setHandled(true);
+        update($result);
+end
+
+rule "UC2-Rule1-False: Low amount at exit during night - not in window or amount exceeded"
+    salience 40
+    when
+        $event : ParkingEvent(
+            deviceType == DeviceType.EXIT
+        )
+        $result : ExceptionResult(
+            exceptionName == "LowAmountAtExitDuringNight",
+            handled == false
+        )
+    then
+        $result.addAction("TRIGGER_AUTOMATED_INTERCOM_CALL");
+        $result.addAction("BOOK_OPEN_AMOUNT_FOR_DIRECT_PAYMENT");
+        $result.setHandled(true);
+        update($result);
+end
+
+// ---- General "Tolerate not paid at exit" rules ----
+
+rule "UC2-General-Rule1: Not paid at exit - operator must handle"
+    salience 50
+    when
+        $event : ParkingEvent(
+            deviceType == DeviceType.EXIT,
+            notPaid == true
+        )
+        $result : ExceptionResult(
+            exceptionName == "TolerateNotPaidAtExit",
+            handled == false
+        )
+    then
+        $result.addAction("STOP_CUSTOMER");
+        $result.addAction("FIRE_EXCEPTION");
+        $result.setHandled(true);
+        update($result);
+end
+
+rule "UC2-General-Rule2: Not paid - registered customer, valid contract, amount < 6 EUR"
+    salience 40
+    when
+        $event : ParkingEvent(
+            deviceType == DeviceType.EXIT,
+            productGroup == ProductGroup.REGISTERED,
+            contractValid == true,
+            openAmount < 6.0,
+            notPaid == true
+        )
+        $result : ExceptionResult(
+            exceptionName == "TolerateNotPaidAtExit",
+            handled == false
+        )
+    then
+        $result.addAction("OPEN_BARRIER");
+        $result.addAction("BOOK_EXIT_TRX_EXCEPTIONAL_PRODUCT_PRICE_ZERO");
+        $result.setHandled(true);
+        update($result);
+end
+
+rule "UC2-General-Rule3: Not paid - short term, amount < 5 EUR, fuzzy n-2 not found"
+    salience 30
+    when
+        $event : ParkingEvent(
+            deviceType == DeviceType.EXIT,
+            productGroup == ProductGroup.SHORT_TERM,
+            openAmount < 5.0,
+            fuzzyN2Found == false,
+            notPaid == true
+        )
+        $result : ExceptionResult(
+            exceptionName == "TolerateNotPaidAtExit",
+            handled == false
+        )
+    then
+        $result.addAction("BOOK_AMOUNT_AS_LOST_REVENUE");
+        $result.addAction("OPEN_BARRIER");
+        $result.setHandled(true);
+        update($result);
+end
+
+rule "UC2-General-Rule4: Not paid - short term, fuzzy n-2 found, no duplicate"
+    salience 20
+    when
+        $event : ParkingEvent(
+            deviceType == DeviceType.EXIT,
+            productGroup == ProductGroup.SHORT_TERM,
+            fuzzyN2Found == true,
+            otherCarWithFuzzyN2Exists == false,
+            notPaid == true
+        )
+        $result : ExceptionResult(
+            exceptionName == "TolerateNotPaidAtExit",
+            handled == false
+        )
+    then
+        $result.addAction("MATCH_HONEST_PAYMENT_TO_PARKING_TRX");
+        $result.addAction("OPEN_BARRIER");
+        $result.setHandled(true);
+        update($result);
+end
+
+rule "UC2-General-Rule5: Not paid - short term, price > 5 EUR"
+    salience 10
+    when
+        $event : ParkingEvent(
+            deviceType == DeviceType.EXIT,
+            productGroup == ProductGroup.SHORT_TERM,
+            openAmount > 5.0,
+            notPaid == true
+        )
+        $result : ExceptionResult(
+            exceptionName == "TolerateNotPaidAtExit",
+            handled == false
+        )
+    then
+        $result.addAction("STOP_CUSTOMER");
+        $result.addAction("FIRE_NOT_PAID_EXCEPTION");
+        $result.addAction("PROCEED_WITH_REGULAR_EXCEPTION_HANDLING");
+        $result.setHandled(true);
+        update($result);
+end

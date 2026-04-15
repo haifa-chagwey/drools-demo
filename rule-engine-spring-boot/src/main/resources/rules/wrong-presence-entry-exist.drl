@@ -14,12 +14,12 @@ when
         facts["deviceType"] == "ENTRY" &&
         facts["productGroup"] == "EMPLOYEE" &&
         facts["wrongPresence"] == true &&
-        facts["durationSinceLastEntry"] >= tenantConfigs["entryToleranceDuration"]
+        facts["durationSinceLastEntry"] >= configs["entryToleranceDuration"]
     )
 then
-    $c.setResult("action", "CREATE_VIRTUAL_ENTRY");
-    $c.setResult("notification", "SYSTEM_NOTIFICATION");
-    $c.setResult("nextStep", "PROCEED");
+    $c.setOutput("action", "CREATE_VIRTUAL_ENTRY");
+    $c.setOutput("notification", "SYSTEM_NOTIFICATION");
+    $c.setOutput("nextStep", "PROCEED");
     System.out.println("Employee wrong presence tolerated (>24h)");
 end
 
@@ -35,8 +35,8 @@ when
         facts["wrongPresence"] == true
     )
 then
-    $c.setResult("notification", "SYSTEM_NOTIFICATION");
-    $c.setResult("action", "INTERCOM");
+    $c.setOutput("notification", "SYSTEM_NOTIFICATION");
+    $c.setOutput("action", "INTERCOM");
     System.out.println("Employee wrong presence → notify + intercom");
 end
 
@@ -52,8 +52,8 @@ when
         facts["wrongPresence"] == true
     )
 then
-    $c.setResult("action", "CLOSE_PREVIOUS_TRANSACTION");
-    $c.setResult("nextStep", "PROCEED");
+    $c.setOutput("action", "CLOSE_PREVIOUS_TRANSACTION");
+    $c.setOutput("nextStep", "PROCEED");
     System.out.println("Short term wrong presence → close previous transaction");
 end
 
@@ -68,8 +68,8 @@ when
         facts["wrongPresence"] == true
     )
 then
-    $c.setResult("action", "CREATE_VIRTUAL_ENTRY");
-    $c.setResult("notification", "SYSTEM_NOTIFICATION");
-    $c.setResult("nextStep", "PROCEED");
+    $c.setOutput("action", "CREATE_VIRTUAL_ENTRY");
+    $c.setOutput("notification", "SYSTEM_NOTIFICATION");
+    $c.setOutput("nextStep", "PROCEED");
     System.out.println("Exit wrong presence → create virtual entry + notify");
 end

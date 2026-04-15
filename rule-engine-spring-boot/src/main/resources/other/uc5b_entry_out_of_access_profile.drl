@@ -1,0 +1,55 @@
+package com.scheidt_bachmann.parking.exceptions
+
+import com.scheidt_bachmann.parking.model.ParkingEvent;
+import com.scheidt_bachmann.parking.model.ExceptionResult;
+import com.scheidt_bachmann.parking.model.ProductGroup;
+import com.scheidt_bachmann.parking.model.DeviceType;
+
+// ============================================================
+// Use-case 5b: Entry out of access profile
+// Car access only
+//
+// Rule 1: any product -> operator must handle
+//   -> false: proceed to rule 2
+// Rule 2: auto handling, product entry grace time violated
+//   -> true:  open barrier + book entry with out-of-access-profile product
+//   -> false: proceed to rule 3 (TBD)
+// ============================================================
+
+rule "UC5b-Rule1: Entry out of access profile - operator must handle"
+    salience 20
+    when
+        $event : ParkingEvent(
+            deviceType == DeviceType.ENTRY,
+            carAccessOnly == true,
+            outOfAccessProfile == true,
+            autoHandlingEnabled == false
+        )
+        $result : ExceptionResult(exceptionName == "EntryOutOfAccessProfile")
+    then
+        $result.addAction("STOP_CUSTOMER");
+        $result.addAction("FIRE_EXCEPTION");
+        $result.setHandled(true);
+        update($result);
+end
+
+rule "UC5b-Rule2: Entry out of access profile - grace time violated, auto handling"
+    salience 10
+    when
+        $event : ParkingEvent(
+            deviceType == DeviceType.ENTRY,
+            carAccessOnly == true,
+            outOfAccessProfile == true,
+            autoHandlingEnabled == true,
+            graceTimeViolated == true
+        )
+        $result : ExceptionResult(
+            exceptionName == "EntryOutOfAccessProfile",
+            handled == false
+        )
+    then
+        $result.addAction("OPEN_BARRIER");
+        $result.addAction("BOOK_ENTRY_WITH_OUT_OF_ACCESS_PROFILE_PRODUCT");
+        $result.setHandled(true);
+        update($result);
+end

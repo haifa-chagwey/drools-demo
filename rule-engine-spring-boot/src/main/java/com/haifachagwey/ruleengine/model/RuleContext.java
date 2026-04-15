@@ -1,36 +1,39 @@
 package com.haifachagwey.ruleengine.model;
 
-import java.util.HashMap;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.Map;
 
+// Fact
+
+@Getter
+@Setter
 public class RuleContext {
 
-    private Map<String, Object> facts;
-    private Map<String, Object> results;
-    private Map<String, Object> tenantConfigs;
+//    input from decision caller
+    private Map<String, Object> inputs;
+    private Map<String, Object> outputs;
+    private Map<String, Object> configs;
 
     public RuleContext() {}
 
-    public RuleContext(Map<String, Object> facts, Map<String, Object> results, Map<String, Object> tenantConfigs) {
-        this.facts = facts;
-        this.results = results;
-        this.tenantConfigs = tenantConfigs;
+    public RuleContext(Map<String, Object> inputs, Map<String, Object> outputs, Map<String, Object> configs) {
+        this.inputs = inputs;
+        this.outputs = outputs;
+        this.configs = configs;
     }
 
 
-    public Object getFact(String key) { return facts.get(key); }
-    public void setFact(String key, Object value) { facts.put(key, value); }
-    public void setFacts(Map<String, Object> facts) { this.facts.putAll(facts); }
-    public Map<String, Object> getFacts() { return facts; }
+    public Object getInput(String key) { return inputs.get(key); }
+    public void setInput(String key, Object value) { inputs.put(key, value); }
 
-    public Object getResult(String key) { return results.get(key); }
-    public void setResult(String key, Object value) { results.put(key, value); }
-    public Map<String, Object> getResults() { return results; }
-    public void setResults(Map<String, Object> results) { this.results.putAll(results); }
+    public Object getOutput(String key) { return outputs.get(key); }
+    public void setOutput(String key, Object value) { outputs.put(key, value); }
 
-    public Object getTenantConfig(String key) { return tenantConfigs.get(key); }
-    public void setTenantConfig(String key, Object value) { tenantConfigs.put(key, value); }
-    public Map<String, Object> getTenantConfigs() { return tenantConfigs; }
-    public void setTenantConfig(Map<String, Object> tenantConfigs) { this.tenantConfigs.putAll(tenantConfigs); }
+
+    public Object getConfig(String key) { return configs.get(key); }
+    public void setConfig(String key, Object value) { configs.put(key, value); }
+
 
 }

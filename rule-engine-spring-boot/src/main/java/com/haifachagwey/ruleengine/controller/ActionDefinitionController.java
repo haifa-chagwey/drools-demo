@@ -1,6 +1,7 @@
 package com.haifachagwey.ruleengine.controller;
 
-import com.haifachagwey.ruleengine.model.ActionDefinition;
+import com.haifachagwey.ruleengine.model.ActionProperty;
+import com.haifachagwey.ruleengine.model.ActionType;
 import com.haifachagwey.ruleengine.service.ActionDefinitionService;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -17,13 +18,18 @@ public class ActionDefinitionController {
     }
 
     @GetMapping
-    public List<ActionDefinition> getAllActions() {
+    public List<ActionProperty> getAllActions() {
         return actionDefinitionService.getAllActions();
     }
 
+    @GetMapping("/types")
+    public List<ActionType> getAllActionTypes() {
+        return actionDefinitionService.getAllActionTypes();
+    }
+
     @PostMapping
-    public ActionDefinition addAction(@RequestBody ActionDefinition actionDefinition) {
-        return actionDefinitionService.saveAction(actionDefinition);
+    public ActionProperty addAction(@RequestBody ActionProperty actionProperty) {
+        return actionDefinitionService.saveAction(actionProperty);
     }
 
     @DeleteMapping("/{id}")

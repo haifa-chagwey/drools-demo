@@ -11,11 +11,11 @@ rule "Car access - unknown LPN - operator"
 salience 100
 when
     $c : RuleContext(
-        facts["deviceType"] == "ENTRY" &&
-        facts["carAccess"] == true
+        inputs["deviceType"] == "ENTRY" &&
+        inputs["carAccess"] == true
     )
 then
-    $c.setResult("action", "INTERCOM");
+    $c.setOutput("action", "INTERCOM");
     System.out.println("Unknown LPN → operator handling");
 end
 
@@ -26,17 +26,17 @@ rule "Car access - no fuzzy candidate"
 salience 90
 when
     $c : RuleContext(
-        facts["deviceType"] == "ENTRY" &&
-        facts["carAccess"] == true &&
-        facts["autoHandling"] == true &&
+        inputs["deviceType"] == "ENTRY" &&
+        inputs["carAccess"] == true &&
+        inputs["autoHandling"] == true &&
         (
-            facts["fuzzyEnabled"] == false ||
-            (facts["fuzzyEnabled"] == true && facts["fuzzyMatchFound"] == false)
+            inputs["fuzzyEnabled"] == false ||
+            (inputs["fuzzyEnabled"] == true && inputs["fuzzyMatchFound"] == false)
         )
     )
 then
-    $c.setResult("action", "OPEN_BARRIER");
-    $c.setResult("financialAction", "CREATE_SHOWUP_PRODUCT");
+    $c.setOutput("action", "OPEN_BARRIER");
+    $c.setOutput("financialAction", "CREATE_SHOWUP_PRODUCT");
     System.out.println("No fuzzy match → open barrier + showup");
 end
 
@@ -47,14 +47,14 @@ rule "Car access - fuzzy candidate found"
 salience 80
 when
     $c : RuleContext(
-        facts["deviceType"] == "ENTRY" &&
-        facts["carAccess"] == true &&
-        facts["autoHandling"] == true &&
-        facts["fuzzyEnabled"] == true &&
-        facts["fuzzyMatchFound"] == true
+        inputs["deviceType"] == "ENTRY" &&
+        inputs["carAccess"] == true &&
+        inputs["autoHandling"] == true &&
+        inputs["fuzzyEnabled"] == true &&
+        inputs["fuzzyMatchFound"] == true
     )
 then
-    $c.setResult("action", "OPEN_BARRIER");
-    $c.setResult("financialAction", "REGISTERED_ENTRY");
+    $c.setOutput("action", "OPEN_BARRIER");
+    $c.setOutput("financialAction", "REGISTERED_ENTRY");
     System.out.println("Fuzzy match → registered entry");
 end

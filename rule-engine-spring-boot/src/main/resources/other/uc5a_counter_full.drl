@@ -1,0 +1,97 @@
+package com.scheidt_bachmann.parking.exceptions
+
+import com.scheidt_bachmann.parking.model.ParkingEvent;
+import com.scheidt_bachmann.parking.model.ExceptionResult;
+import com.scheidt_bachmann.parking.model.ProductGroup;
+import com.scheidt_bachmann.parking.model.DeviceType;
+import com.scheidt_bachmann.parking.model.CounterMode;
+
+// ============================================================
+// Use-case 5a: Counter full
+//
+// Rule 1: any product counter -> operator must handle
+//   -> false: proceed to rule 2
+// Rule 2: auto handling, counter FULL, counter mode = NORMAL
+//   -> true:  open barrier + overbook counter
+//   -> false: proceed to rule 3
+// Rule 3: auto handling, counter FREE but car park FULL
+//   -> true:  stop customer + fire exception
+//   -> false: proceed to rule 4 (falls through)
+// Rule 4: auto handling, counter BLOCKED
+//   -> true:  stop customer + fire exception
+// ============================================================
+
+rule "UC5a-Rule1: Counter full - operator must handle"
+    salience 40
+    when
+        $event : ParkingEvent(
+            deviceType == DeviceType.ENTRY,
+            autoHandlingEnabled == false,
+            relatedCounterFull == true
+        )
+        $result : ExceptionResult(exceptionName == "RelatedCounterFull")
+    then
+        $result.addAction("STOP_CUSTOMER");
+        $result.addAction("FIRE_EXCEPTION");
+        $result.setHandled(true);
+        update($result);
+end
+
+rule "UC5a-Rule2: Counter full - auto handling, counter FULL, mode NORMAL"
+    salience 30
+    when
+        $event : ParkingEvent(
+            deviceType == DeviceType.ENTRY,
+            autoHandlingEnabled == true,
+            relatedCounterFull == true,
+            relatedCounterMode == CounterMode.NORMAL
+        )
+        $result : ExceptionResult(
+            exceptionName == "RelatedCounterFull",
+            handled == false
+        )
+    then
+        $result.addAction("OPEN_BARRIER");
+        $result.addAction("OVERBOOK_COUNTER");
+        $result.setHandled(true);
+        update($result);
+end
+
+rule "UC5a-Rule3: Counter free but car park full"
+    salience 20
+    when
+        $event : ParkingEvent(
+            deviceType == DeviceType.ENTRY,
+            autoHandlingEnabled == true,
+            relatedCounterFull == false,
+            carParkFull == true
+        )
+        $result : ExceptionResult(
+            exceptionName == "RelatedCounterFull",
+            handled == false
+        )
+    then
+        $result.addAction("STOP_CUSTOMER");
+        $result.addAction("FIRE_EXCEPTION");
+        $result.setHandled(true);
+        update($result);
+end
+
+rule "UC5a-Rule4: Counter blocked"
+    salience 10
+    when
+        $event : ParkingEvent(
+            deviceType == DeviceType.ENTRY,
+            autoHandlingEnabled == true,
+            relatedCounterMode == CounterMode.BLOCKED
+        )
+        $result : ExceptionResult(
+            exceptionName == "RelatedCounterFull",
+            handled == false
+        )
+    then
+        $result.addAction("STOP_CUSTOMER");
+        $result.addAction("FIRE_EXCEPTION");
+        $result.setHandled(true);
+        update($result);
+end

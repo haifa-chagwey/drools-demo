@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "rule_conditions")
+@Table(name = "associated_condition")
 public class RuleCondition {
 
     @Id

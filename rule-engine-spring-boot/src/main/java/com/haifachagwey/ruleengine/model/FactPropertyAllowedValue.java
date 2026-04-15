@@ -1,5 +1,6 @@
 package com.haifachagwey.ruleengine.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,4 +21,9 @@ public class FactPropertyAllowedValue {
 
     @Column(name = "allowed_value", nullable = false)
     private String value;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "fact_property_id")
+    @JsonBackReference
+    private FactProperty factProperty;  // <-- this field must exist for mappedBy
 }

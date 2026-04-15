@@ -1,0 +1,96 @@
+<mxfile host="drawio-plugin" modified="2026-04-15T13:40:00.000Z" agent="Mozilla/5.0" version="22.1.22" type="embed">
+  <diagram name="RuleEngineSchema" id="RuleEngineSchema">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- Table: FactType -->
+        <mxCell id="fact_type" value="FACT_TYPE&#xa;--&#xa;+ id : INT (PK)&#xa;* name : VARCHAR&#xa;  description : TEXT" style="shape=table;startSize=30;container=1;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="180" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- Table: FactProperty -->
+        <mxCell id="fact_property" value="FACT_PROPERTY&#xa;--&#xa;+ id : INT (PK)&#xa;* key : VARCHAR&#xa;* label : VARCHAR&#xa;* type : VARCHAR&#xa;* fact_type_id : INT (FK)" style="shape=table;startSize=30;container=1;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="200" width="180" height="130" as="geometry" />
+        </mxCell>
+
+        <!-- Table: FactPropertyAllowedValue -->
+        <mxCell id="fact_allowed_value" value="FACT_PROPERTY_ALLOWED_VALUE&#xa;--&#xa;+ id : INT (PK)&#xa;* fact_property_id : INT (FK)&#xa;* value : VARCHAR&#xa;* label : VARCHAR" style="shape=table;startSize=30;container=1;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="400" width="220" height="110" as="geometry" />
+        </mxCell>
+
+        <!-- Table: Rule -->
+        <mxCell id="rule" value="RULE&#xa;--&#xa;+ id : LONG (PK)&#xa;* name : VARCHAR&#xa;* fact_type_id : INT (FK)&#xa;  enabled : BOOLEAN" style="shape=table;startSize=30;container=1;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;" vertex="1" parent="1">
+          <mxGeometry x="300" y="40" width="180" height="110" as="geometry" />
+        </mxCell>
+
+        <!-- Table: ActionType -->
+        <mxCell id="action_type" value="ACTION_TYPE&#xa;--&#xa;+ id : INT (PK)&#xa;* name : VARCHAR&#xa;  description : TEXT" style="shape=table;startSize=30;container=1;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;" vertex="1" parent="1">
+          <mxGeometry x="560" y="40" width="180" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- Table: ActionProperty -->
+        <mxCell id="action_property" value="ACTION_PROPERTY&#xa;--&#xa;+ id : INT (PK)&#xa;* key : VARCHAR&#xa;* label : VARCHAR&#xa;* type : VARCHAR&#xa;* action_type_id : INT (FK)" style="shape=table;startSize=30;container=1;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;" vertex="1" parent="1">
+          <mxGeometry x="560" y="200" width="180" height="130" as="geometry" />
+        </mxCell>
+
+        <!-- Table: ActionPropertyAllowedValue -->
+        <mxCell id="action_allowed_value" value="ACTION_PROPERTY_ALLOWED_VALUE&#xa;--&#xa;+ id : INT (PK)&#xa;* action_property_id : INT (FK)&#xa;* value : VARCHAR&#xa;* label : VARCHAR" style="shape=table;startSize=30;container=1;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;" vertex="1" parent="1">
+          <mxGeometry x="560" y="400" width="220" height="110" as="geometry" />
+        </mxCell>
+
+        <!-- Table: RuleCondition -->
+        <mxCell id="rule_condition" value="RULE_CONDITION&#xa;--&#xa;+ id : LONG (PK)&#xa;* rule_id : LONG (FK)&#xa;* fact_property_id : INT (FK)&#xa;  operator : VARCHAR&#xa;  constant_value : TEXT" style="shape=table;startSize=30;container=1;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;" vertex="1" parent="1">
+          <mxGeometry x="300" y="230" width="180" height="130" as="geometry" />
+        </mxCell>
+
+        <!-- Table: RuleAction -->
+        <mxCell id="rule_action" value="RULE_ACTION&#xa;--&#xa;+ id : LONG (PK)&#xa;* rule_id : LONG (FK)&#xa;* action_property_id : INT (FK)&#xa;  output_value : TEXT" style="shape=table;startSize=30;container=1;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;" vertex="1" parent="1">
+          <mxGeometry x="300" y="400" width="200" height="110" as="geometry" />
+        </mxCell>
+
+        <!-- Table: Compatibility (Join Table) -->
+        <mxCell id="compatibility" value="FACT_ACTION_MAPPING&#xa;--&#xa;* fact_type_id : INT (FK)&#xa;* action_type_id : INT (FK)" style="shape=table;startSize=30;container=1;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;" vertex="1" parent="1">
+          <mxGeometry x="300" y="550" width="180" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- Relationships -->
+        <mxCell id="rel1" style="endArrow=ERoneToMany;endFill=0;startArrow=ERmandOne;startFill=0;" edge="1" parent="1" source="fact_type" target="fact_property">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel2" style="endArrow=ERoneToMany;endFill=0;startArrow=ERmandOne;startFill=0;" edge="1" parent="1" source="fact_type" target="rule">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel3" style="endArrow=ERoneToMany;endFill=0;startArrow=ERmandOne;startFill=0;" edge="1" parent="1" source="action_type" target="action_property">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel4" style="endArrow=ERoneToMany;endFill=0;startArrow=ERmandOne;startFill=0;" edge="1" parent="1" source="rule" target="rule_condition">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel5" style="endArrow=ERoneToMany;endFill=0;startArrow=ERmandOne;startFill=0;" edge="1" parent="1" source="rule" target="rule_action">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel6" style="endArrow=ERmandOne;endFill=0;startArrow=ERmandOne;startFill=0;" edge="1" parent="1" source="fact_property" target="rule_condition">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel7" style="endArrow=ERmandOne;endFill=0;startArrow=ERmandOne;startFill=0;" edge="1" parent="1" source="action_property" target="rule_action">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel8" style="endArrow=ERoneToMany;endFill=0;startArrow=ERmandOne;startFill=0;" edge="1" parent="1" source="fact_type" target="compatibility">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel9" style="endArrow=ERoneToMany;endFill=0;startArrow=ERmandOne;startFill=0;" edge="1" parent="1" source="action_type" target="compatibility">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel10" style="endArrow=ERoneToMany;endFill=0;startArrow=ERmandOne;startFill=0;" edge="1" parent="1" source="fact_property" target="fact_allowed_value">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel11" style="endArrow=ERoneToMany;endFill=0;startArrow=ERmandOne;startFill=0;" edge="1" parent="1" source="action_property" target="action_allowed_value">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

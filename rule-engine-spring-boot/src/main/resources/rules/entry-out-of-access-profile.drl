@@ -15,7 +15,7 @@ when
         facts["carAccess"] == true
     )
 then
-    $c.setResult("action", "INTERCOM");
+    $c.setOutput("action", "INTERCOM");
     System.out.println("Out of profile → operator");
 end
 
@@ -30,7 +30,7 @@ when
         facts["graceTimeViolated"] == true
     )
 then
-    $c.setResult("action", "OPEN_BARRIER");
-    $c.setResult("financialAction", "OUT_OF_PROFILE_ENTRY");
+    $c.setOutput("action", "OPEN_BARRIER");
+    $c.setOutput("financialAction", "OUT_OF_PROFILE_ENTRY");
     System.out.println("Grace time violated → allow entry with special product");
 end

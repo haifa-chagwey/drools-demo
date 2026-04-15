@@ -1,0 +1,79 @@
+package com.scheidt_bachmann.parking.exceptions
+
+import com.scheidt_bachmann.parking.model.ParkingEvent;
+import com.scheidt_bachmann.parking.model.ExceptionResult;
+import com.scheidt_bachmann.parking.model.ProductGroup;
+import com.scheidt_bachmann.parking.model.DeviceType;
+
+// ============================================================
+// Use-case 4: Car access - medium not found (Unknown LPN on entry)
+// Car access only
+//
+// Rule 1: no product match -> operator must handle
+//   -> false: proceed to rule 2
+// Rule 2: auto handling, fuzzy deactivated OR (fuzzy activated AND no candidate)
+//   -> true:  open barrier + book showup product with LPN
+//   -> false: proceed to rule 3
+// Rule 3: auto handling, fuzzy activated AND fuzzy candidate found
+//   -> true:  open barrier + book registered customer entry with original & fuzzy LPN
+// ============================================================
+
+rule "UC4-Rule1: Unknown LPN - operator must handle"
+    salience 30
+    when
+        $event : ParkingEvent(
+            deviceType == DeviceType.ENTRY,
+            carAccessOnly == true,
+            productGroup == ProductGroup.NONE,
+            autoHandlingEnabled == false
+        )
+        $result : ExceptionResult(exceptionName == "UnknownLPNOnEntry")
+    then
+        $result.addAction("STOP_CUSTOMER");
+        $result.addAction("FIRE_EXCEPTION");
+        $result.setHandled(true);
+        update($result);
+end
+
+rule "UC4-Rule2: Unknown LPN - auto handling, no fuzzy candidate"
+    salience 20
+    when
+        $event : ParkingEvent(
+            deviceType == DeviceType.ENTRY,
+            carAccessOnly == true,
+            productGroup == ProductGroup.NONE,
+            autoHandlingEnabled == true,
+            (fuzzyEnabled == false || fuzzyN2Found == false)
+        )
+        $result : ExceptionResult(
+            exceptionName == "UnknownLPNOnEntry",
+            handled == false
+        )
+    then
+        $result.addAction("OPEN_BARRIER");
+        $result.addAction("BOOK_SHOWUP_PRODUCT_WITH_LPN");
+        $result.setHandled(true);
+        update($result);
+end
+
+rule "UC4-Rule3: Unknown LPN - auto handling, fuzzy candidate found"
+    salience 10
+    when
+        $event : ParkingEvent(
+            deviceType == DeviceType.ENTRY,
+            carAccessOnly == true,
+            productGroup == ProductGroup.NONE,
+            autoHandlingEnabled == true,
+            fuzzyEnabled == true,
+            fuzzyN2Found == true
+        )
+        $result : ExceptionResult(
+            exceptionName == "UnknownLPNOnEntry",
+            handled == false
+        )
+    then
+        $result.addAction("OPEN_BARRIER");
+        $result.addAction("BOOK_REGISTERED_CUSTOMER_ENTRY_ORIGINAL_AND_FUZZY_LPN");
+        $result.setHandled(true);
+        update($result);
+end

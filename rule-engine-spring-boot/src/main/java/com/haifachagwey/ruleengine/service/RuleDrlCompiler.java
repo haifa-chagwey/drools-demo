@@ -48,15 +48,17 @@ public class RuleDrlCompiler {
             for (RuleAction action : rule.getActions()) {
                 if (action.isEnabled()) {
                     String key = "unknown";
-                    if (action.getActionDefinition() != null) {
-                        key = action.getActionDefinition().getKey();
+                    FactPropertyType valueType = FactPropertyType.STRING;
+                    if (action.getActionProperty() != null) {
+                        key = action.getActionProperty().getKey();
+                        valueType = action.getActionProperty().getType();
                     } else if (action.getOutputKey() != null) {
                         key = action.getOutputKey();
                     }
                     drl.append("    $c.setResult(\"")
                        .append(key)
                        .append("\", ")
-                       .append(formatConstant(action.getOutputValue(), action.getValueType()))
+                       .append(formatConstant(action.getOutputValue(), valueType))
                        .append(");\n");
                 }
             }
@@ -69,8 +71,10 @@ public class RuleDrlCompiler {
 
     private String compileCondition(RuleCondition condition) {
         String leftHandSide;
+        FactPropertyType type = FactPropertyType.STRING;
         if (condition.getFactPropertyDefinition() != null) {
             leftHandSide = "facts[\"" + condition.getFactPropertyDefinition().getKey() + "\"]";
+            type = condition.getFactPropertyDefinition().getType();
         } else if (condition.getFieldName() != null) {
             leftHandSide = "facts[\"" + condition.getFieldName() + "\"]";
         } else {
@@ -78,15 +82,15 @@ public class RuleDrlCompiler {
         }
 
         String operator = condition.getOperator();
-        String rightHandSide = operandToExpression(condition);
+        String rightHandSide = operandToExpression(condition, type);
         
         return leftHandSide + " " + (operator != null ? operator : "==") + " " + rightHandSide;
     }
 
-    private String operandToExpression(RuleCondition condition) {
+    private String operandToExpression(RuleCondition condition, FactPropertyType valueType) {
         String type = condition.getRightOperandType();
         if ("CONSTANT".equalsIgnoreCase(type)) {
-            return formatConstant(condition.getConstantValue(), null);
+            return formatConstant(condition.getConstantValue(), valueType);
         } else if ("CONFIG".equalsIgnoreCase(type)) {
             return "tenantConfigs[\"" + condition.getConfigKey() + "\"]";
         } else if ("FIELD".equalsIgnoreCase(type)) {
@@ -94,22 +98,17 @@ public class RuleDrlCompiler {
         } else if (condition.getThresholdKey() != null) {
             return "tenantConfigs[\"" + condition.getThresholdKey() + "\"]";
         }
-        return formatConstant(condition.getConstantValue(), null);
+        return formatConstant(condition.getConstantValue(), valueType);
     }
 
-    private String formatConstant(String value, String valueType) {
+    private String formatConstant(String value, FactPropertyType valueType) {
         if (value == null) return "null";
-        if ("true".equalsIgnoreCase(value) || "false".equalsIgnoreCase(value)) {
-            return "\"" + value.toLowerCase() + "\"";
+        if (valueType == FactPropertyType.BOOLEAN) {
+            return value.toLowerCase();
         }
-        if ("Integer".equalsIgnoreCase(valueType) || "Double".equalsIgnoreCase(valueType) || "Long".equalsIgnoreCase(valueType)) {
+        if (valueType == FactPropertyType.NUMBER) {
             return value;
         }
-        try {
-            Double.parseDouble(value);
-            return value;
-        } catch (NumberFormatException e) {
-            return "\"" + value.replace("\"", "\\\"") + "\"";
-        }
+        return "\"" + value.replace("\"", "\\\"") + "\"";
     }
 }

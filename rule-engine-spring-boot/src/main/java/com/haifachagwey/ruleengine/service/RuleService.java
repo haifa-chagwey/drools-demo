@@ -1,7 +1,9 @@
 package com.haifachagwey.ruleengine.service;
 
 import com.haifachagwey.ruleengine.model.*;
+import com.haifachagwey.ruleengine.repository.ActionDefinitionRepository;
 import com.haifachagwey.ruleengine.repository.FactPropertyRepository;
+import com.haifachagwey.ruleengine.repository.FactTypeRepository;
 import com.haifachagwey.ruleengine.repository.RuleRepository;
 import com.haifachagwey.ruleengine.repository.TenantConfigRepository;
 import jakarta.annotation.PostConstruct;
@@ -25,14 +27,18 @@ public class RuleService {
     private final KieServices kieServices;
     private final RuleDrlCompiler ruleDrlCompiler;
     private final FactPropertyRepository factPropertyRepository;
+    private final FactTypeRepository factTypeRepository;
+    private final ActionDefinitionRepository actionDefinitionRepository;
     private KieContainer kieContainer;
 
-    public RuleService(RuleRepository ruleRepository, TenantConfigRepository tenantConfigRepository, KieServices kieServices, RuleDrlCompiler ruleDrlCompiler, FactPropertyRepository factPropertyRepository) {
+    public RuleService(RuleRepository ruleRepository, TenantConfigRepository tenantConfigRepository, KieServices kieServices, RuleDrlCompiler ruleDrlCompiler, FactPropertyRepository factPropertyRepository, FactTypeRepository factTypeRepository, ActionDefinitionRepository actionDefinitionRepository) {
         this.ruleRepository = ruleRepository;
         this.tenantConfigRepository = tenantConfigRepository;
         this.kieServices = kieServices;
         this.ruleDrlCompiler = ruleDrlCompiler;
         this.factPropertyRepository = factPropertyRepository;
+        this.factTypeRepository = factTypeRepository;
+        this.actionDefinitionRepository = actionDefinitionRepository;
     }
 
 //    Rule Management
@@ -59,11 +65,24 @@ public class RuleService {
     }
 
     private void validateRule(Rule rule) {
+        if (rule.getFactType() != null) {
+            factTypeRepository.findById(rule.getFactType().getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Unknown fact ID: " + rule.getFactType().getId()));
+        }
         if (rule.getConditions() != null) {
             for (RuleCondition condition : rule.getConditions()) {
                 if (condition.getFactPropertyDefinition() != null) {
                     factPropertyRepository.findById(condition.getFactPropertyDefinition().getId())
                             .orElseThrow(() -> new IllegalArgumentException("Unknown fact definition ID: " + condition.getFactPropertyDefinition().getId()));
+                }
+            }
+        }
+        if (rule.getActions() != null) {
+            for (RuleAction action : rule.getActions()) {
+                if (action.getActionProperty() != null) {
+                    ActionProperty actionDef = actionDefinitionRepository.findById(action.getActionProperty().getId())
+                            .orElseThrow(() -> new IllegalArgumentException("Unknown action definition ID: " + action.getActionProperty().getId()));
+                    action.setActionProperty(actionDef);
                 }
             }
         }
@@ -103,15 +122,10 @@ public class RuleService {
         }
 
         Map<String, Object> results = new HashMap<>();
-
-        RuleContext ruleContext = new RuleContext();
-        ruleContext.setFacts(input);
-        ruleContext.setTenantConfig(mergedConfigs);
-        ruleContext.setResults(results);
-
+        RuleContext ruleContext = new RuleContext(input, results, mergedConfigs);
         kieSession.insert(ruleContext);
         kieSession.fireAllRules();
         kieSession.dispose();
-        return ruleContext.getResults();
+        return ruleContext.getOutputs();
     }
 }

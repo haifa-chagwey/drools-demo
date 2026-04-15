@@ -1,0 +1,75 @@
+package com.scheidt_bachmann.parking.exceptions
+
+import com.scheidt_bachmann.parking.model.ParkingEvent;
+import com.scheidt_bachmann.parking.model.Transaction;
+import com.scheidt_bachmann.parking.model.ExceptionResult;
+import com.scheidt_bachmann.parking.model.ProductGroup;
+import com.scheidt_bachmann.parking.model.DeviceType;
+
+// ============================================================
+// Use-case 1: Tolerate expired contract parker at exit
+// Exception: Contract parker expired at exit (also overstay)
+// Rule ID 1: amount <= 10 EUR AND expired product
+//   -> true:  silent, proceed to rule 2
+//   -> false: book open amount for direct payment
+// Rule ID 2: amount <= 2 EUR AND expired product
+//   -> true:  book as lost revenue + open barrier
+//   -> false: book for later payment (invoice) + open barrier
+// ============================================================
+
+rule "UC1-Rule1: Expired contract parker at exit - amount > 10 EUR"
+    salience 20
+    when
+        $event : ParkingEvent(
+            deviceType == DeviceType.EXIT,
+            productGroup == ProductGroup.CONTRACT_PARKER,
+            productExpired == true,
+            openAmount > 10.0
+        )
+        $result : ExceptionResult(exceptionName == "ContractParkerExpiredAtExit")
+    then
+        $result.addAction("BOOK_OPEN_AMOUNT_FOR_DIRECT_PAYMENT");
+        $result.setHandled(true);
+        update($result);
+end
+
+rule "UC1-Rule2a: Expired contract parker at exit - amount <= 2 EUR"
+    salience 10
+    when
+        $event : ParkingEvent(
+            deviceType == DeviceType.EXIT,
+            productGroup == ProductGroup.CONTRACT_PARKER,
+            productExpired == true,
+            openAmount <= 2.0
+        )
+        $result : ExceptionResult(
+            exceptionName == "ContractParkerExpiredAtExit",
+            handled == false
+        )
+    then
+        $result.addAction("BOOK_AMOUNT_AS_LOST_REVENUE");
+        $result.addAction("OPEN_BARRIER");
+        $result.setHandled(true);
+        update($result);
+end
+
+rule "UC1-Rule2b: Expired contract parker at exit - amount 2-10 EUR"
+    salience 10
+    when
+        $event : ParkingEvent(
+            deviceType == DeviceType.EXIT,
+            productGroup == ProductGroup.CONTRACT_PARKER,
+            productExpired == true,
+            openAmount > 2.0,
+            openAmount <= 10.0
+        )
+        $result : ExceptionResult(
+            exceptionName == "ContractParkerExpiredAtExit",
+            handled == false
+        )
+    then
+        $result.addAction("BOOK_OPEN_AMOUNT_FOR_LATER_PAYMENT_INVOICING");
+        $result.addAction("OPEN_BARRIER");
+        $result.setHandled(true);
+        update($result);
+end
