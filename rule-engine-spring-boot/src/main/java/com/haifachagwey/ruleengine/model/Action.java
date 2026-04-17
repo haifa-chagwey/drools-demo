@@ -16,8 +16,8 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "fact_property")
-public class FactProperty {
+@Table(name = "action")
+public class Action {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,17 +40,17 @@ public class FactProperty {
     @JsonBackReference
     private FactType factType;
 
-    @OneToMany(mappedBy = "factProperty", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "action", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     @Builder.Default
-    private Set<FactPropertyAllowedValue> allowedValues = new HashSet<>();
+    private Set<ActionAllowedValue> allowedValues = new HashSet<>();
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        FactProperty that = (FactProperty) o;
-        return Objects.equals(id, that.id);
+        Action action = (Action) o;
+        return Objects.equals(id, action.id);
     }
 
     @Override

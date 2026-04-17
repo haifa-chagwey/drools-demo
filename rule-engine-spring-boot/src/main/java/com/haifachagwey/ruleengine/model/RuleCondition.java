@@ -11,38 +11,25 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "associated_condition")
+@Table(name = "rule_condition")
 public class RuleCondition {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne
+    @JoinColumn(name = "fact_property_id")
+    private FactProperty factProperty;
+
     private String operator;
 
-    private String fieldName;
-
-    private String thresholdKey;
-
-    private String thresholdType;
-
-    private String rightOperandType;
-
-    private String constantValue;
-
-    private String configKey;
-
-    private Integer orderIndex;
-
-    @Builder.Default
-    private boolean enabled = true;
+    private String value;
 
     @ManyToOne
     @JoinColumn(name = "rule_id")
     private Rule rule;
 
-    @ManyToOne
-    @JoinColumn(name = "fact_definition_id")
-    private FactProperty factPropertyDefinition;
+
 
 }

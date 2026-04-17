@@ -3,17 +3,18 @@ package com.haifachagwey.ruleengine.model;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.util.Objects;
 
 @Entity
 @Getter
 @Setter
-@ToString(exclude = "factProperty")
+@ToString(exclude = "action")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "fact_property_allowed_value")
-public class FactPropertyAllowedValue {
+@Table(name = "action_allowed_value")
+public class ActionAllowedValue {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,15 +26,15 @@ public class FactPropertyAllowedValue {
     private String label;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fact_property_id")
+    @JoinColumn(name = "action_id")
     @JsonBackReference
-    private FactProperty factProperty;
+    private Action action;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        FactPropertyAllowedValue that = (FactPropertyAllowedValue) o;
+        ActionAllowedValue that = (ActionAllowedValue) o;
         return Objects.equals(id, that.id);
     }
 

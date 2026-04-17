@@ -1,7 +1,9 @@
 package rules;
 
-import com.haifachagwey.ruleengine.model.RuleContext;
+import com.haifachagwey.ruleengine.model.GlobalFact;
 
+global java.util.Map outputs;
+global java.util.Map configs;
 dialect "mvel"
 
 //////////////////////////////////////////////////////
@@ -10,11 +12,11 @@ dialect "mvel"
 rule "Counter full - operator"
 salience 100
 when
-    $c : RuleContext(
+    $f : GlobalFact(
         facts["deviceType"] == "ENTRY"
     )
 then
-    $c.setOutput("action", "INTERCOM");
+    outputs.put("action", "INTERCOM");
     System.out.println("Counter issue → operator");
 end
 
@@ -24,14 +26,14 @@ end
 rule "Counter full - overbook allowed"
 salience 90
 when
-    $c : RuleContext(
+    $f : GlobalFact(
         facts["autoHandling"] == true &&
         facts["counterState"] == "FULL" &&
         facts["counterMode"] == "NORMAL"
     )
 then
-    $c.setOutput("action", "OPEN_BARRIER");
-    $c.setOutput("counterAction", "OVERBOOK");
+    outputs.put("action", "OPEN_BARRIER");
+    outputs.put("counterAction", "OVERBOOK");
     System.out.println("Counter full → overbook");
 end
 
@@ -41,13 +43,13 @@ end
 rule "Car park full"
 salience 80
 when
-    $c : RuleContext(
+    $f : GlobalFact(
         facts["autoHandling"] == true &&
         facts["counterState"] == "FREE" &&
         facts["carParkFull"] == true
     )
 then
-    $c.setOutput("action", "INTERCOM");
+    outputs.put("action", "INTERCOM");
     System.out.println("Car park full → stop customer");
 end
 
@@ -57,11 +59,11 @@ end
 rule "Counter blocked"
 salience 70
 when
-    $c : RuleContext(
+    $f : GlobalFact(
         facts["autoHandling"] == true &&
         facts["counterState"] == "BLOCKED"
     )
 then
-    $c.setOutput("action", "INTERCOM");
+    outputs.put("action", "INTERCOM");
     System.out.println("Counter blocked → stop customer");
 end

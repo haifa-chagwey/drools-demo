@@ -1,7 +1,9 @@
 package rules;
 
-import com.haifachagwey.ruleengine.model.RuleContext;
+import com.haifachagwey.ruleengine.model.GlobalFact;
 
+global java.util.Map outputs;
+global java.util.Map configs;
 dialect "mvel"
 
 //////////////////////////////////////////////////////
@@ -10,12 +12,12 @@ dialect "mvel"
 rule "Access profile - operator"
 salience 100
 when
-    $c : RuleContext(
+    $f : GlobalFact(
         facts["deviceType"] == "ENTRY" &&
         facts["carAccess"] == true
     )
 then
-    $c.setOutput("action", "INTERCOM");
+    outputs.put("action", "INTERCOM");
     System.out.println("Out of profile → operator");
 end
 
@@ -25,12 +27,12 @@ end
 rule "Access profile - grace time violated"
 salience 90
 when
-    $c : RuleContext(
+    $f : GlobalFact(
         facts["autoHandling"] == true &&
         facts["graceTimeViolated"] == true
     )
 then
-    $c.setOutput("action", "OPEN_BARRIER");
-    $c.setOutput("financialAction", "OUT_OF_PROFILE_ENTRY");
+    outputs.put("action", "OPEN_BARRIER");
+    outputs.put("financialAction", "OUT_OF_PROFILE_ENTRY");
     System.out.println("Grace time violated → allow entry with special product");
 end

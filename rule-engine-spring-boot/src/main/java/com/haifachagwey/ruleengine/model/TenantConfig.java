@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "tenant_configs")
+@Table(name = "configs")
 public class TenantConfig {
 
     @Id

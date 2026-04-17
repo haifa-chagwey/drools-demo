@@ -1,33 +1,19 @@
 -- =========================================================================
--- RULE ENGINE FINAL DATABASE SCHEMA & SAMPLE DATA
--- Version: 1.0 (Categorized Enterprise Version)
--- Description: Supports Guided Rule Builder with Domains, Categories, 
---              Filtering (Fact-Action Mapping), and Dropdowns (Allowed Values).
+-- RULE ENGINE FINAL DATABASE SCHEMA & SAMPLE DATA (SIMPLIFIED VERSION)
+-- Version: 2.0 (Direct Fact-Action Mapping)
+-- Description: Supports Guided Rule Builder with Domains (FactTypes), 
+--              FactProperties, ActionProperties, and Allowed Values.
 -- =========================================================================
 
--- 1. METADATA: DOMAINS & CATEGORIES
+-- 1. METADATA: DOMAINS
 CREATE TABLE fact_type (
     id INT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT
 );
 
-CREATE TABLE action_type (
-    id INT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    description TEXT
-);
-
--- Many-to-Many link for Contextual UI Filtering
-CREATE TABLE fact_action_mapping (
-    fact_type_id INT,
-    action_type_id INT,
-    PRIMARY KEY (fact_type_id, action_type_id),
-    FOREIGN KEY (fact_type_id) REFERENCES fact_type(id),
-    FOREIGN KEY (action_type_id) REFERENCES action_type(id)
-);
-
 -- 2. METADATA: PROPERTY DEFINITIONS (WHEN & THEN)
+-- Link FactProperty directly to FactType
 CREATE TABLE fact_property (
     id INT PRIMARY KEY,
     key VARCHAR(255) NOT NULL UNIQUE,
@@ -45,13 +31,14 @@ CREATE TABLE fact_property_allowed_value (
     FOREIGN KEY (fact_property_id) REFERENCES fact_property(id)
 );
 
+-- Link ActionProperty directly to FactType (Simplified)
 CREATE TABLE action_property (
     id INT PRIMARY KEY,
     key VARCHAR(255) NOT NULL UNIQUE,
     label VARCHAR(255) NOT NULL,
     type VARCHAR(50) NOT NULL,
-    action_type_id INT,
-    FOREIGN KEY (action_type_id) REFERENCES action_type(id)
+    fact_type_id INT,
+    FOREIGN KEY (fact_type_id) REFERENCES fact_type(id)
 );
 
 CREATE TABLE action_property_allowed_value (
@@ -95,19 +82,17 @@ CREATE TABLE rule_action (
 -- SAMPLE DATA: ENFORCEMENT DOMAIN SETUP
 -- =========================================================================
 
--- Step A: Setup the Context
+-- Step A: Setup the Context (Domain)
 INSERT INTO fact_type (id, name, description) VALUES (1, 'ENFORCEMENT', 'Rules for security and access control.');
-INSERT INTO action_type (id, name, description) VALUES (1, 'Gate Control', 'Operations for barriers and hardware.');
-INSERT INTO fact_action_mapping (fact_type_id, action_type_id) VALUES (1, 1);
 
--- Step B: Setup Condition Definitions (The WHEN Options)
+-- Step B: Setup Condition Definitions (The WHEN Options) - Linked to Domain 1
 INSERT INTO fact_property (id, key, label, type, fact_type_id) VALUES (1, 'product_group', 'Product Group', 'STRING', 1);
 INSERT INTO fact_property_allowed_value (id, fact_property_id, value, label) VALUES 
 (1, 1, 'CONTRACT', 'Contract Parker'),
 (2, 1, 'SHORT', 'Short-Term Parker');
 
--- Step C: Setup Action Definitions (The THEN Options)
-INSERT INTO action_property (id, key, label, type, action_type_id) VALUES (1, 'OPEN_BARRIER', 'Open Barrier', 'BOOLEAN', 1);
+-- Step C: Setup Action Definitions (The THEN Options) - Linked Directly to Domain 1
+INSERT INTO action_property (id, key, label, type, fact_type_id) VALUES (1, 'OPEN_BARRIER', 'Open Barrier', 'BOOLEAN', 1);
 INSERT INTO action_property_allowed_value (id, action_property_id, value, label) VALUES 
 (1, 1, 'true', 'Yes (Open Gate)'),
 (2, 1, 'false', 'No (Leave Closed)');

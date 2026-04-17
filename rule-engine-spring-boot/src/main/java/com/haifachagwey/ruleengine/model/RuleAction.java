@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "associated_action")
+@Table(name = "rule_action")
 public class RuleAction {
 
     @Id
@@ -34,7 +34,7 @@ public class RuleAction {
     private Rule rule;
 
     @ManyToOne
-    @JoinColumn(name = "action_definition_id")
-    private ActionProperty actionProperty;
+    @JoinColumn(name = "action_id")
+    private Action actionProperty;
 
 }

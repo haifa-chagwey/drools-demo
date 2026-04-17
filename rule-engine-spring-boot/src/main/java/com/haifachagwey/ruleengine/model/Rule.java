@@ -30,11 +30,8 @@ public class Rule {
     @JoinColumn(name = "fact_id")
     private FactType factType;
 
-    @Column(columnDefinition = "TEXT")
-    private String drl;
-
     @Builder.Default
-    private boolean enabled = true;
+    private boolean active = true;
 
     @OneToMany(mappedBy = "rule", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default

@@ -10,27 +10,25 @@ import java.util.List;
 public class RuleDrlCompiler {
 
     public String compile(Rule rule) {
-        if (rule.getDrl() != null && !rule.getDrl().isEmpty()) {
-            return rule.getDrl();
-        }
         StringBuilder drl = new StringBuilder();
 
         drl.append("package rules;\n");
-        drl.append("import com.haifachagwey.ruleengine.model.RuleContext;\n");
-        drl.append("global java.util.Map output;\n");
-        drl.append("global java.util.Map tenantConfigs;\n");
+        if (rule.getFactType() != null) {
+            drl.append("// Domain: ").append(rule.getFactType().getName()).append("\n");
+        }
+        drl.append("import com.haifachagwey.ruleengine.model.GlobalFact;\n");
+        drl.append("global java.util.Map outputs;\n");
+        drl.append("global java.util.Map configs;\n");
         drl.append("dialect \"mvel\"\n\n");
 
         drl.append("rule \"").append(rule.getName()).append("\"\n");
         drl.append("when\n");
-        drl.append("    $c : RuleContext(");
+        drl.append("    $f : GlobalFact(");
 
         if (rule.getConditions() != null && !rule.getConditions().isEmpty()) {
             List<String> parts = new ArrayList<>();
             for (RuleCondition condition : rule.getConditions()) {
-                if (condition.isEnabled()) {
                     parts.add(compileCondition(condition));
-                }
             }
             if (parts.isEmpty()) {
                 drl.append("eval(true)");
@@ -55,7 +53,7 @@ public class RuleDrlCompiler {
                     } else if (action.getOutputKey() != null) {
                         key = action.getOutputKey();
                     }
-                    drl.append("    $c.setResult(\"")
+                    drl.append("    outputs.put(\"")
                        .append(key)
                        .append("\", ")
                        .append(formatConstant(action.getOutputValue(), valueType))
@@ -72,34 +70,27 @@ public class RuleDrlCompiler {
     private String compileCondition(RuleCondition condition) {
         String leftHandSide;
         FactPropertyType type = FactPropertyType.STRING;
-        if (condition.getFactPropertyDefinition() != null) {
-            leftHandSide = "facts[\"" + condition.getFactPropertyDefinition().getKey() + "\"]";
-            type = condition.getFactPropertyDefinition().getType();
-        } else if (condition.getFieldName() != null) {
-            leftHandSide = "facts[\"" + condition.getFieldName() + "\"]";
+        if (condition.getFactProperty() != null) {
+            leftHandSide = "properties[\"" + condition.getFactProperty().getKey() + "\"]";
+            type = condition.getFactProperty().getType();
         } else {
-            leftHandSide = "eval(true)"; // Or some default
+            return "eval(true)";
         }
 
         String operator = condition.getOperator();
-        String rightHandSide = operandToExpression(condition, type);
-        
-        return leftHandSide + " " + (operator != null ? operator : "==") + " " + rightHandSide;
+        if (operator == null) operator = "==";
+
+        String rightHandSide;
+        if (condition.getValue() != null && condition.getValue().startsWith("config:")) {
+            String configKey = condition.getValue().substring("config:".length());
+            rightHandSide = "configs[\"" + configKey + "\"]";
+        } else {
+            rightHandSide = formatConstant(condition.getValue(), type);
+        }
+
+        return leftHandSide + " " + operator + " " + rightHandSide;
     }
 
-    private String operandToExpression(RuleCondition condition, FactPropertyType valueType) {
-        String type = condition.getRightOperandType();
-        if ("CONSTANT".equalsIgnoreCase(type)) {
-            return formatConstant(condition.getConstantValue(), valueType);
-        } else if ("CONFIG".equalsIgnoreCase(type)) {
-            return "tenantConfigs[\"" + condition.getConfigKey() + "\"]";
-        } else if ("FIELD".equalsIgnoreCase(type)) {
-             return "facts[\"" + condition.getConstantValue() + "\"]";
-        } else if (condition.getThresholdKey() != null) {
-            return "tenantConfigs[\"" + condition.getThresholdKey() + "\"]";
-        }
-        return formatConstant(condition.getConstantValue(), valueType);
-    }
 
     private String formatConstant(String value, FactPropertyType valueType) {
         if (value == null) return "null";

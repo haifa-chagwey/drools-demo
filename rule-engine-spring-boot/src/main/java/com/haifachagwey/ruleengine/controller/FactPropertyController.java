@@ -7,7 +7,7 @@ import java.util.List;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:4200")
-@RequestMapping("/api/admin/facts")
+@RequestMapping("/api/admin/fact-properties")
 public class FactPropertyController {
 
     private final FactService factService;

@@ -1,7 +1,9 @@
 package rules;
 
-import com.haifachagwey.ruleengine.model.RuleContext;
+import com.haifachagwey.ruleengine.model.GlobalFact;
 
+global java.util.Map outputs;
+global java.util.Map configs;
 dialect "mvel"
 
 //////////////////////////////////////////////////////
@@ -10,16 +12,16 @@ dialect "mvel"
 rule "Entry - Employee wrong presence > 24h"
 salience 100
 when
-    $c : RuleContext(
+    $f : GlobalFact(
         facts["deviceType"] == "ENTRY" &&
         facts["productGroup"] == "EMPLOYEE" &&
         facts["wrongPresence"] == true &&
         facts["durationSinceLastEntry"] >= configs["entryToleranceDuration"]
     )
 then
-    $c.setOutput("action", "CREATE_VIRTUAL_ENTRY");
-    $c.setOutput("notification", "SYSTEM_NOTIFICATION");
-    $c.setOutput("nextStep", "PROCEED");
+    outputs.put("action", "CREATE_VIRTUAL_ENTRY");
+    outputs.put("notification", "SYSTEM_NOTIFICATION");
+    outputs.put("nextStep", "PROCEED");
     System.out.println("Employee wrong presence tolerated (>24h)");
 end
 
@@ -29,14 +31,14 @@ end
 rule "Entry - Employee wrong presence"
 salience 90
 when
-    $c : RuleContext(
+    $f : GlobalFact(
         facts["deviceType"] == "ENTRY" &&
         facts["productGroup"] == "EMPLOYEE" &&
         facts["wrongPresence"] == true
     )
 then
-    $c.setOutput("notification", "SYSTEM_NOTIFICATION");
-    $c.setOutput("action", "INTERCOM");
+    outputs.put("notification", "SYSTEM_NOTIFICATION");
+    outputs.put("action", "INTERCOM");
     System.out.println("Employee wrong presence → notify + intercom");
 end
 
@@ -46,14 +48,14 @@ end
 rule "Entry - Short term wrong presence"
 salience 80
 when
-    $c : RuleContext(
+    $f : GlobalFact(
         facts["deviceType"] == "ENTRY" &&
         facts["productGroup"] == "SHORT_TERM" &&
         facts["wrongPresence"] == true
     )
 then
-    $c.setOutput("action", "CLOSE_PREVIOUS_TRANSACTION");
-    $c.setOutput("nextStep", "PROCEED");
+    outputs.put("action", "CLOSE_PREVIOUS_TRANSACTION");
+    outputs.put("nextStep", "PROCEED");
     System.out.println("Short term wrong presence → close previous transaction");
 end
 
@@ -63,13 +65,13 @@ end
 rule "Exit - Wrong presence"
 salience 70
 when
-    $c : RuleContext(
+    $f : GlobalFact(
         facts["deviceType"] == "EXIT" &&
         facts["wrongPresence"] == true
     )
 then
-    $c.setOutput("action", "CREATE_VIRTUAL_ENTRY");
-    $c.setOutput("notification", "SYSTEM_NOTIFICATION");
-    $c.setOutput("nextStep", "PROCEED");
+    outputs.put("action", "CREATE_VIRTUAL_ENTRY");
+    outputs.put("notification", "SYSTEM_NOTIFICATION");
+    outputs.put("nextStep", "PROCEED");
     System.out.println("Exit wrong presence → create virtual entry + notify");
 end

@@ -2,15 +2,14 @@ package com.haifachagwey.ruleengine.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-import java.util.List;
+import java.util.*;
 
 @Entity
-@Data
+@Getter
+@Setter
+@ToString(exclude = {"properties", "actions"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -28,5 +27,24 @@ public class FactType {
 
     @OneToMany(mappedBy = "factType", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
-    private List<FactProperty> properties;
+    @Builder.Default
+    private Set<FactProperty> properties = new HashSet<>();
+
+    @OneToMany(mappedBy = "factType", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    @Builder.Default
+    private Set<Action> actions = new HashSet<>();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FactType factType = (FactType) o;
+        return Objects.equals(id, factType.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
 }

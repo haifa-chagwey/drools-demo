@@ -8,7 +8,7 @@ import java.util.List;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:4200")
-    @RequestMapping("/api/admin/facts-registry")
+    @RequestMapping("/api/admin/facts")
 public class FactController {
 
     private final FactService factService;
