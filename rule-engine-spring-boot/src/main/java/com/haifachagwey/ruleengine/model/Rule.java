@@ -28,7 +28,7 @@ public class Rule {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fact_id")
-    private FactType factType;
+    private Fact fact;
 
     @Builder.Default
     private boolean active = true;

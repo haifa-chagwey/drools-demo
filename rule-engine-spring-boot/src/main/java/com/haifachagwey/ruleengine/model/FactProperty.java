@@ -7,12 +7,10 @@ import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Objects;
 
 @Entity
 @Getter
 @Setter
-@ToString(exclude = {"factType", "allowedValues"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -36,25 +34,25 @@ public class FactProperty {
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fact_type_id")
+    @JoinColumn(name = "fact_id")
     @JsonBackReference
-    private FactType factType;
+    private Fact fact;
 
     @OneToMany(mappedBy = "factProperty", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     @Builder.Default
-    private Set<FactPropertyAllowedValue> allowedValues = new HashSet<>();
+    private Set<FactPropertyValue> allowedValues = new HashSet<>();
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof FactProperty)) return false;
         FactProperty that = (FactProperty) o;
-        return Objects.equals(id, that.id);
+        return id != null && id.equals(that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        return getClass().hashCode();
     }
 }

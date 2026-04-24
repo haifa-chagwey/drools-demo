@@ -16,5 +16,5 @@ public interface FactPropertyRepository extends JpaRepository<FactProperty, Inte
     List<FactProperty> findAll();
 
     @EntityGraph(attributePaths = {"allowedValues"})
-    List<FactProperty> findByFactTypeId(Integer factTypeId);
+    List<FactProperty> findByFactId(Integer factId);
 }

@@ -7,17 +7,16 @@ import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Objects;
 
 @Entity
 @Getter
 @Setter
-@ToString(exclude = {"factType", "allowedValues"})
+@ToString(exclude = {"fact", "allowedValues"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "action")
-public class Action {
+@Table(name = "fact_associated_action")
+public class FactAssociatedAction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,25 +35,25 @@ public class Action {
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fact_type_id")
+    @JoinColumn(name = "fact_id")
     @JsonBackReference
-    private FactType factType;
+    private Fact fact;
 
-    @OneToMany(mappedBy = "action", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "factAssociatedAction", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     @Builder.Default
-    private Set<ActionAllowedValue> allowedValues = new HashSet<>();
+    private Set<FactAssociatedActionValue> allowedValues = new HashSet<>();
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Action action = (Action) o;
-        return Objects.equals(id, action.id);
+        if (!(o instanceof FactAssociatedAction)) return false;
+        FactAssociatedAction factAssociatedAction = (FactAssociatedAction) o;
+        return id != null && id.equals(factAssociatedAction.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        return getClass().hashCode();
     }
 }

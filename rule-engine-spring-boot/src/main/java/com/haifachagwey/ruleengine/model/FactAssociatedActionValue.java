@@ -4,17 +4,14 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.Objects;
-
 @Entity
 @Getter
 @Setter
-@ToString(exclude = "action")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Table(name = "action_allowed_value")
-public class ActionAllowedValue {
+public class FactAssociatedActionValue {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,18 +25,18 @@ public class ActionAllowedValue {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "action_id")
     @JsonBackReference
-    private Action action;
+    private FactAssociatedAction factAssociatedAction;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ActionAllowedValue that = (ActionAllowedValue) o;
-        return Objects.equals(id, that.id);
+        if (!(o instanceof FactAssociatedActionValue)) return false;
+        FactAssociatedActionValue that = (FactAssociatedActionValue) o;
+        return id != null && id.equals(that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        return getClass().hashCode();
     }
 }

@@ -16,7 +16,7 @@ when
         facts["deviceType"] == "ENTRY"
     )
 then
-    outputs.put("action", "INTERCOM");
+    outputs.put("factAssociatedAction", "INTERCOM");
     System.out.println("Counter issue → operator");
 end
 
@@ -32,7 +32,7 @@ when
         facts["counterMode"] == "NORMAL"
     )
 then
-    outputs.put("action", "OPEN_BARRIER");
+    outputs.put("factAssociatedAction", "OPEN_BARRIER");
     outputs.put("counterAction", "OVERBOOK");
     System.out.println("Counter full → overbook");
 end
@@ -49,7 +49,7 @@ when
         facts["carParkFull"] == true
     )
 then
-    outputs.put("action", "INTERCOM");
+    outputs.put("factAssociatedAction", "INTERCOM");
     System.out.println("Car park full → stop customer");
 end
 
@@ -64,6 +64,6 @@ when
         facts["counterState"] == "BLOCKED"
     )
 then
-    outputs.put("action", "INTERCOM");
+    outputs.put("factAssociatedAction", "INTERCOM");
     System.out.println("Counter blocked → stop customer");
 end

@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-04-19" agent="Claude" version="21.0.0">
+  <diagram name="Diagramme de classes — Gérer règles" id="class-gerer-regles">
+    <mxGraphModel dx="1422" dy="762" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ══════════════════════════════
+             BOUNDARY — UI Gérer règles
+             ══════════════════════════════ -->
+        <mxCell id="ui" value="&lt;&lt;Boundary&gt;&gt;&#xa;UI - Gérer règles" 
+          style="text;html=1;strokeColor=#000000;fillColor=#ffffff;align=center;verticalAlign=middle;spacingTop=-4;fontSize=11;fontStyle=1;shape=mxgraph.uml.component2;whiteSpace=wrap;" 
+          vertex="1" parent="1">
+          <mxGeometry x="40" y="300" width="160" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- ══════════════════════════════
+             CONTROL — C Gérer règles
+             ══════════════════════════════ -->
+        <mxCell id="ctrl" value="&lt;&lt;Control&gt;&gt;&#xa;C - Gérer règles" 
+          style="text;html=1;strokeColor=#000000;fillColor=#ffffff;align=center;verticalAlign=middle;spacingTop=-4;fontSize=11;fontStyle=1;shape=mxgraph.uml.component2;whiteSpace=wrap;" 
+          vertex="1" parent="1">
+          <mxGeometry x="280" y="300" width="160" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- ══════════════════════════════
+             ENTITY — RuleDomain
+             ══════════════════════════════ -->
+        <!-- Header -->
+        <mxCell id="rd_h" value="&lt;&lt;Entity&gt;&gt;&#xa;RuleDomain" 
+          style="text;html=1;strokeColor=#000000;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=11;fontStyle=1;border=1;" 
+          vertex="1" parent="1">
+          <mxGeometry x="560" y="40" width="180" height="40" as="geometry" />
+        </mxCell>
+        <!-- Attributes -->
+        <mxCell id="rd_a" value="+ id : long&#xa;+ name : varchar" 
+          style="text;html=1;strokeColor=#000000;fillColor=#ffffff;align=left;verticalAlign=top;fontSize=10;spacingLeft=6;" 
+          vertex="1" parent="1">
+          <mxGeometry x="560" y="80" width="180" height="44" as="geometry" />
+        </mxCell>
+        <!-- Border lines -->
+        <mxCell id="rd_b" value="" style="strokeColor=#000000;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="560" y="40" width="180" height="84" as="geometry" />
+        </mxCell>
+        <mxCell id="rd_l" value="" style="endArrow=none;html=1;strokeColor=#000000;" edge="1" parent="1">
+          <mxGeometry x="560" y="80" relative="1" as="geometry"><mxPoint x="740" y="80" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- ══════════════════════════════
+             ENTITY — Rule
+             ══════════════════════════════ -->
+        <mxCell id="r_h" value="&lt;&lt;Entity&gt;&gt;&#xa;Rule" 
+          style="text;html=1;strokeColor=#000000;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=11;fontStyle=1;" 
+          vertex="1" parent="1">
+          <mxGeometry x="560" y="220" width="180" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="r_a" value="+ id : long&#xa;+ name : varchar&#xa;+ salience : int&#xa;+ active : boolean" 
+          style="text;html=1;strokeColor=#000000;fillColor=#ffffff;align=left;verticalAlign=top;fontSize=10;spacingLeft=6;" 
+          vertex="1" parent="1">
+          <mxGeometry x="560" y="260" width="180" height="76" as="geometry" />
+        </mxCell>
+        <mxCell id="r_b" value="" style="strokeColor=#000000;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="560" y="220" width="180" height="116" as="geometry" />
+        </mxCell>
+        <mxCell id="r_l" value="" style="endArrow=none;html=1;strokeColor=#000000;" edge="1" parent="1">
+          <mxGeometry x="560" y="260" relative="1" as="geometry"><mxPoint x="740" y="260" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- ══════════════════════════════
+             ENTITY — RuleCondition
+             ══════════════════════════════ -->
+        <mxCell id="rc_h" value="&lt;&lt;Entity&gt;&gt;&#xa;RuleCondition" 
+          style="text;html=1;strokeColor=#000000;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=11;fontStyle=1;" 
+          vertex="1" parent="1">
+          <mxGeometry x="320" y="520" width="180" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="rc_a" value="+ id : long&#xa;+ factType : varchar&#xa;+ fieldName : varchar&#xa;+ operator : varchar&#xa;+ value : varchar" 
+          style="text;html=1;strokeColor=#000000;fillColor=#ffffff;align=left;verticalAlign=top;fontSize=10;spacingLeft=6;" 
+          vertex="1" parent="1">
+          <mxGeometry x="320" y="560" width="180" height="92" as="geometry" />
+        </mxCell>
+        <mxCell id="rc_b" value="" style="strokeColor=#000000;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="320" y="520" width="180" height="132" as="geometry" />
+        </mxCell>
+        <mxCell id="rc_l" value="" style="endArrow=none;html=1;strokeColor=#000000;" edge="1" parent="1">
+          <mxGeometry x="320" y="560" relative="1" as="geometry"><mxPoint x="500" y="560" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- ══════════════════════════════
+             ENTITY — RuleAction
+             ══════════════════════════════ -->
+        <mxCell id="ra_h" value="&lt;&lt;Entity&gt;&gt;&#xa;RuleAction" 
+          style="text;html=1;strokeColor=#000000;fillColor=#ffffff;align=center;verticalAlign=middle;fontSize=11;fontStyle=1;" 
+          vertex="1" parent="1">
+          <mxGeometry x="800" y="520" width="180" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="ra_a" value="+ id : long&#xa;+ actionCategory : varchar&#xa;+ parameterValue : varchar&#xa;+ branch : varchar&#xa;+ sequence : int" 
+          style="text;html=1;strokeColor=#000000;fillColor=#ffffff;align=left;verticalAlign=top;fontSize=10;spacingLeft=6;" 
+          vertex="1" parent="1">
+          <mxGeometry x="800" y="560" width="180" height="92" as="geometry" />
+        </mxCell>
+        <mxCell id="ra_b" value="" style="strokeColor=#000000;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="800" y="520" width="180" height="132" as="geometry" />
+        </mxCell>
+        <mxCell id="ra_l" value="" style="endArrow=none;html=1;strokeColor=#000000;" edge="1" parent="1">
+          <mxGeometry x="800" y="560" relative="1" as="geometry"><mxPoint x="980" y="560" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- ══════════════════════════════
+             RELATIONS
+             ══════════════════════════════ -->
+
+        <!-- UI → Control (association) -->
+        <mxCell id="rel_ui_ctrl" value="" 
+          style="endArrow=open;endFill=0;html=1;strokeColor=#000000;" 
+          edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="200" y="330" as="sourcePoint"/>
+            <mxPoint x="280" y="330" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Control → Rule (association) -->
+        <mxCell id="rel_ctrl_r" value="" 
+          style="endArrow=open;endFill=0;html=1;strokeColor=#000000;" 
+          edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="440" y="330" as="sourcePoint"/>
+            <mxPoint x="560" y="300" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- RuleDomain → Rule (1 to many) -->
+        <mxCell id="rel_rd_r" value="" 
+          style="endArrow=ERmany;startArrow=ERone;html=1;strokeColor=#000000;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" 
+          edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="650" y="124" as="sourcePoint"/>
+            <mxPoint x="650" y="220" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_rd_r_l1" value="1" style="resizable=0;html=1;align=left;verticalAlign=bottom;fontSize=10;" connectable="0" vertex="1" parent="rel_rd_r">
+          <mxGeometry x="-0.8" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_rd_r_l2" value="*" style="resizable=0;html=1;align=left;verticalAlign=top;fontSize=10;" connectable="0" vertex="1" parent="rel_rd_r">
+          <mxGeometry x="0.8" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+
+        <!-- Rule → RuleCondition (1 to many) -->
+        <mxCell id="rel_r_rc" value="" 
+          style="endArrow=ERmany;startArrow=ERone;html=1;strokeColor=#000000;" 
+          edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="600" y="336" as="sourcePoint"/>
+            <mxPoint x="450" y="520" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_r_rc_l1" value="1" style="resizable=0;html=1;align=right;verticalAlign=bottom;fontSize=10;" connectable="0" vertex="1" parent="rel_r_rc">
+          <mxGeometry x="-0.7" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_r_rc_l2" value="*" style="resizable=0;html=1;align=left;verticalAlign=top;fontSize=10;" connectable="0" vertex="1" parent="rel_r_rc">
+          <mxGeometry x="0.7" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+
+        <!-- Rule → RuleAction (1 to many) -->
+        <mxCell id="rel_r_ra" value="" 
+          style="endArrow=ERmany;startArrow=ERone;html=1;strokeColor=#000000;" 
+          edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="700" y="336" as="sourcePoint"/>
+            <mxPoint x="860" y="520" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_r_ra_l1" value="1" style="resizable=0;html=1;align=right;verticalAlign=bottom;fontSize=10;" connectable="0" vertex="1" parent="rel_r_ra">
+          <mxGeometry x="-0.7" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="rel_r_ra_l2" value="*" style="resizable=0;html=1;align=left;verticalAlign=top;fontSize=10;" connectable="0" vertex="1" parent="rel_r_ra">
+          <mxGeometry x="0.7" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -3,7 +3,6 @@ package com.haifachagwey.ruleengine.model;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
-import java.util.Objects;
 
 @Entity
 @Getter
@@ -13,7 +12,7 @@ import java.util.Objects;
 @AllArgsConstructor
 @Builder
 @Table(name = "fact_property_allowed_value")
-public class FactPropertyAllowedValue {
+public class FactPropertyValue {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,13 +31,13 @@ public class FactPropertyAllowedValue {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        FactPropertyAllowedValue that = (FactPropertyAllowedValue) o;
-        return Objects.equals(id, that.id);
+        if (!(o instanceof FactPropertyValue)) return false;
+        FactPropertyValue that = (FactPropertyValue) o;
+        return id != null && id.equals(that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        return getClass().hashCode();
     }
 }

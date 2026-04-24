@@ -1,10 +1,10 @@
 package com.haifachagwey.ruleengine.repository;
 
-import com.haifachagwey.ruleengine.model.FactPropertyAllowedValue;
+import com.haifachagwey.ruleengine.model.FactPropertyValue;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface FactPropertyAllowedValueRepository extends JpaRepository<FactPropertyAllowedValue, Integer> {
-    FactPropertyAllowedValue findByValue(String value);
+public interface FactPropertyAllowedValueRepository extends JpaRepository<FactPropertyValue, Integer> {
+    FactPropertyValue findByValue(String value);
 }

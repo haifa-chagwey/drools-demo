@@ -19,7 +19,7 @@ when
         properties["amount"] > configs["mediumAmountThreshold"]
     )
 then
-    outputs.put("action", "DIRECT_PAYMENT");
+    outputs.put("factAssociatedAction", "DIRECT_PAYMENT");
     System.out.println("Direct payment required");
 end
 
@@ -54,6 +54,6 @@ when
         properties["amount"] <= configs["lowAmountThreshold"]
     )
 then
-    outputs.put("action", "LOST_REVENUE");
+    outputs.put("factAssociatedAction", "LOST_REVENUE");
     outputs.put("openBarrier", true);
 end

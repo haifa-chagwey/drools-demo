@@ -13,8 +13,8 @@ public class RuleDrlCompiler {
         StringBuilder drl = new StringBuilder();
 
         drl.append("package rules;\n");
-        if (rule.getFactType() != null) {
-            drl.append("// Domain: ").append(rule.getFactType().getName()).append("\n");
+        if (rule.getFact() != null) {
+            drl.append("// Domain: ").append(rule.getFact().getName()).append("\n");
         }
         drl.append("import com.haifachagwey.ruleengine.model.GlobalFact;\n");
         drl.append("global java.util.Map outputs;\n");
@@ -47,9 +47,9 @@ public class RuleDrlCompiler {
                 if (action.isEnabled()) {
                     String key = "unknown";
                     FactPropertyType valueType = FactPropertyType.STRING;
-                    if (action.getActionProperty() != null) {
-                        key = action.getActionProperty().getKey();
-                        valueType = action.getActionProperty().getType();
+                    if (action.getFactAssociatedActionProperty() != null) {
+                        key = action.getFactAssociatedActionProperty().getKey();
+                        valueType = action.getFactAssociatedActionProperty().getType();
                     } else if (action.getOutputKey() != null) {
                         key = action.getOutputKey();
                     }

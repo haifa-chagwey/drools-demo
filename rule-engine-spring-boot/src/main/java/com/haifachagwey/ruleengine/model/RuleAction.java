@@ -35,6 +35,6 @@ public class RuleAction {
 
     @ManyToOne
     @JoinColumn(name = "action_id")
-    private Action actionProperty;
+    private FactAssociatedAction factAssociatedActionProperty;
 
 }
