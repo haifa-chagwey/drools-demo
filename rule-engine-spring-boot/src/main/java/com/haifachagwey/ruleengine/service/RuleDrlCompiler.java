@@ -44,21 +44,21 @@ public class RuleDrlCompiler {
 
         if (rule.getActions() != null) {
             for (RuleAction action : rule.getActions()) {
-                if (action.isEnabled()) {
                     String key = "unknown";
-                    FactPropertyType valueType = FactPropertyType.STRING;
-                    if (action.getFactAssociatedActionProperty() != null) {
-                        key = action.getFactAssociatedActionProperty().getKey();
-                        valueType = action.getFactAssociatedActionProperty().getType();
-                    } else if (action.getOutputKey() != null) {
-                        key = action.getOutputKey();
+                    AttributeType valueType = AttributeType.STRING;
+                    if (action.getAction() != null) {
+                        key = action.getAction().getKey();
+                        valueType = action.getAction().getType();
                     }
+//                    else if (action.getOutputKey() != null) {
+//                        key = action.getOutputKey();
+//                    }
                     drl.append("    outputs.put(\"")
                        .append(key)
                        .append("\", ")
-                       .append(formatConstant(action.getOutputValue(), valueType))
+                       .append(formatConstant(action.getValue(), valueType))
                        .append(");\n");
-                }
+
             }
         }
 
@@ -69,10 +69,10 @@ public class RuleDrlCompiler {
 
     private String compileCondition(RuleCondition condition) {
         String leftHandSide;
-        FactPropertyType type = FactPropertyType.STRING;
-        if (condition.getFactProperty() != null) {
-            leftHandSide = "properties[\"" + condition.getFactProperty().getKey() + "\"]";
-            type = condition.getFactProperty().getType();
+        AttributeType type = AttributeType.STRING;
+        if (condition.getAttribute() != null) {
+            leftHandSide = "properties[\"" + condition.getAttribute().getKey() + "\"]";
+            type = condition.getAttribute().getType();
         } else {
             return "eval(true)";
         }
@@ -92,12 +92,12 @@ public class RuleDrlCompiler {
     }
 
 
-    private String formatConstant(String value, FactPropertyType valueType) {
+    private String formatConstant(String value, AttributeType valueType) {
         if (value == null) return "null";
-        if (valueType == FactPropertyType.BOOLEAN) {
+        if (valueType == AttributeType.BOOLEAN) {
             return value.toLowerCase();
         }
-        if (valueType == FactPropertyType.NUMBER) {
+        if (valueType == AttributeType.NUMBER) {
             return value;
         }
         return "\"" + value.replace("\"", "\\\"") + "\"";

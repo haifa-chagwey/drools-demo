@@ -2,7 +2,7 @@ spring:
   application:
     name: rule-engine
   datasource:
-    url: jdbc:postgresql://localhost:5432/rule-engine
+    url: jdbc:postgresql://localhost:5432/rule-builder
     username: haifa
     password: haifa
     driver-class-name: org.postgresql.Driver

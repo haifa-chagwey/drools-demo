@@ -21,7 +21,7 @@ when
         )
     )
 then
-    outputs.put("factAssociatedAction", "OPEN_BARRIER");
+    outputs.put("associatedAction", "OPEN_BARRIER");
     outputs.put("financialAction", "LOST_REVENUE");
     System.out.println("Night + low amount → open barrier, lost revenue");
 end
@@ -43,7 +43,7 @@ when
         )
     )
 then
-    outputs.put("factAssociatedAction", "INTERCOM");
+    outputs.put("associatedAction", "INTERCOM");
     outputs.put("financialAction", "DIRECT_PAYMENT");
     System.out.println("Night condition not met → intercom + direct payment");
 end
@@ -59,7 +59,7 @@ when
         properties["deviceType"] == "EXIT"
     )
 then
-    outputs.put("factAssociatedAction", "INTERCOM");
+    outputs.put("associatedAction", "INTERCOM");
     outputs.put("financialAction", "DIRECT_PAYMENT");
     System.out.println("Default: operator handling required");
 end
@@ -77,7 +77,7 @@ when
         properties["amount"] < configs["registeredMaxAmount"]
     )
 then
-    outputs.put("factAssociatedAction", "OPEN_BARRIER");
+    outputs.put("associatedAction", "OPEN_BARRIER");
     outputs.put("financialAction", "EXCEPTIONAL_EXIT");
     System.out.println("Registered customer: open barrier, no charge");
 end
@@ -96,7 +96,7 @@ when
         properties["fuzzyMatchFound"] == false
     )
 then
-    outputs.put("factAssociatedAction", "OPEN_BARRIER");
+    outputs.put("associatedAction", "OPEN_BARRIER");
     outputs.put("financialAction", "LOST_REVENUE");
     System.out.println("Low amount + no fuzzy match → lost revenue");
 end
@@ -113,7 +113,7 @@ when
         properties["uniqueFuzzyMatch"] == true
     )
 then
-    outputs.put("factAssociatedAction", "OPEN_BARRIER");
+    outputs.put("associatedAction", "OPEN_BARRIER");
     outputs.put("financialAction", "MATCH_PAYMENT");
     System.out.println("Fuzzy match found and unique → match payment");
 end
@@ -131,7 +131,7 @@ when
         properties["amount"] > configs["highAmountThreshold"]
     )
 then
-    $rc.setOutput("factAssociatedAction", "INTERCOM");
+    $rc.setOutput("associatedAction", "INTERCOM");
     $rc.setOutput("financialAction", "EXCEPTION");
     System.out.println("High amount → manual handling required");
 end

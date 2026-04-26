@@ -1,6 +1,6 @@
 Here is a comprehensive list of request bodies and examples for every API endpoint to test the updated dynamic rule engine.
 
-I have included the **Recommended Approach** (using separate `condition` and `factAssociatedAction` fields) as it's better for UI integration.
+I have included the **Recommended Approach** (using separate `condition` and `associatedAction` fields) as it's better for UI integration.
 
 ### 1. List All Rules
 **Method:** `GET`  
@@ -18,7 +18,7 @@ I have included the **Recommended Approach** (using separate `condition` and `fa
   "name": "GoldCustomerDiscount",
   "description": "Applies a 20% discount for GOLD customers",
   "condition": "this[\"customerType\"] == \"GOLD\"",
-  "factAssociatedAction": "output.put(\"discount\", 20); output.put(\"status\", \"GOLD_OFFER_APPLIED\");",
+  "associatedAction": "output.put(\"discount\", 20); output.put(\"status\", \"GOLD_OFFER_APPLIED\");",
   "createdBy": "admin"
 }
 ```
@@ -50,7 +50,7 @@ I have included the **Recommended Approach** (using separate `condition` and `fa
   "id": 1,
   "name": "UpdatedMemberDiscount",
   "condition": "this[\"customerType\"] == \"MEMBER\"",
-  "factAssociatedAction": "output.put(\"discount\", 10);",
+  "associatedAction": "output.put(\"discount\", 10);",
   "modifiedBy": "manager"
 }
 ```

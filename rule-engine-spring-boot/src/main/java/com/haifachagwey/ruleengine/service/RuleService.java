@@ -1,9 +1,9 @@
 package com.haifachagwey.ruleengine.service;
 
 import com.haifachagwey.ruleengine.model.*;
-import com.haifachagwey.ruleengine.repository.FactActionRepository;
-import com.haifachagwey.ruleengine.repository.FactPropertyRepository;
-import com.haifachagwey.ruleengine.repository.FactTypeRepository;
+import com.haifachagwey.ruleengine.repository.AssociatedActionRepository;
+import com.haifachagwey.ruleengine.repository.FactAttributeRepository;
+import com.haifachagwey.ruleengine.repository.FactRepository;
 import com.haifachagwey.ruleengine.repository.RuleRepository;
 import com.haifachagwey.ruleengine.repository.TenantConfigRepository;
 import jakarta.annotation.PostConstruct;
@@ -26,37 +26,37 @@ public class RuleService {
     private final TenantConfigRepository tenantConfigRepository;
     private final KieServices kieServices;
     private final RuleDrlCompiler ruleDrlCompiler;
-    private final FactPropertyRepository factPropertyRepository;
-    private final FactTypeRepository factTypeRepository;
-    private final FactActionRepository factActionRepository;
+    private final FactAttributeRepository factAttributeRepository;
+    private final FactRepository factRepository;
+    private final AssociatedActionRepository associatedActionRepository;
     private KieContainer kieContainer;
 
-    public RuleService(RuleRepository ruleRepository, TenantConfigRepository tenantConfigRepository, KieServices kieServices, RuleDrlCompiler ruleDrlCompiler, FactPropertyRepository factPropertyRepository, FactTypeRepository factTypeRepository, FactActionRepository factActionRepository) {
+    public RuleService(RuleRepository ruleRepository, TenantConfigRepository tenantConfigRepository, KieServices kieServices, RuleDrlCompiler ruleDrlCompiler, FactAttributeRepository factAttributeRepository, FactRepository factRepository, AssociatedActionRepository associatedActionRepository) {
         this.ruleRepository = ruleRepository;
         this.tenantConfigRepository = tenantConfigRepository;
         this.kieServices = kieServices;
         this.ruleDrlCompiler = ruleDrlCompiler;
-        this.factPropertyRepository = factPropertyRepository;
-        this.factTypeRepository = factTypeRepository;
-        this.factActionRepository = factActionRepository;
+        this.factAttributeRepository = factAttributeRepository;
+        this.factRepository = factRepository;
+        this.associatedActionRepository = associatedActionRepository;
     }
 
 //    Rule Management
 
-    @PostConstruct
-    public void init() {
-        reloadRules();
-    }
+//    @PostConstruct
+//    public void init() {
+//        reloadRules();
+//    }
 
     @Transactional
     public Rule saveRule(Rule rule) {
         if (rule.getFact() != null) {
             Fact fact = null;
             if (rule.getFact().getId() != null) {
-                fact = factTypeRepository.findById(rule.getFact().getId())
+                fact = factRepository.findById(rule.getFact().getId())
                         .orElseThrow(() -> new IllegalArgumentException("Unknown fact type ID: " + rule.getFact().getId()));
             } else if (rule.getFact().getName() != null) {
-                fact = factTypeRepository.findByName(rule.getFact().getName())
+                fact = factRepository.findByName(rule.getFact().getName())
                         .orElseThrow(() -> new IllegalArgumentException("Unknown fact type name: " + rule.getFact().getName()));
             }
             if (fact != null) {
@@ -72,7 +72,7 @@ public class RuleService {
             rule.getActions().forEach(a -> a.setRule(rule));
         }
         Rule saved = ruleRepository.save(rule);
-        reloadRules();
+//        reloadRules();
         return saved;
     }
 
@@ -89,10 +89,10 @@ public class RuleService {
         Fact ruleFact = null;
         if (rule.getFact() != null) {
             if (rule.getFact().getId() != null) {
-                ruleFact = factTypeRepository.findById(rule.getFact().getId())
+                ruleFact = factRepository.findById(rule.getFact().getId())
                         .orElseThrow(() -> new IllegalArgumentException("Unknown fact ID: " + rule.getFact().getId()));
             } else if (rule.getFact().getName() != null) {
-                ruleFact = factTypeRepository.findByName(rule.getFact().getName())
+                ruleFact = factRepository.findByName(rule.getFact().getName())
                         .orElseThrow(() -> new IllegalArgumentException("Unknown fact name: " + rule.getFact().getName()));
             }
         }
@@ -105,25 +105,25 @@ public class RuleService {
 
         if (rule.getConditions() != null) {
             for (RuleCondition condition : rule.getConditions()) {
-                if (condition.getFactProperty() != null) {
-                    FactProperty factPropDef = factPropertyRepository.findById(condition.getFactProperty().getId())
-                            .orElseThrow(() -> new IllegalArgumentException("Unknown fact definition ID: " + condition.getFactProperty().getId()));
+                if (condition.getAttribute() != null) {
+                    FactAttribute factPropDef = factAttributeRepository.findById(condition.getAttribute().getId())
+                            .orElseThrow(() -> new IllegalArgumentException("Unknown fact definition ID: " + condition.getAttribute().getId()));
                     if (ruleFact != null && !factPropDef.getFact().getId().equals(ruleFact.getId())) {
                         throw new IllegalArgumentException("Condition property '" + factPropDef.getKey() + "' does not belong to domain '" + ruleFact.getName() + "'");
                     }
-                    condition.setFactProperty(factPropDef);
+                    condition.setAttribute(factPropDef);
                 }
             }
         }
         if (rule.getActions() != null) {
             for (RuleAction action : rule.getActions()) {
-                if (action.getFactAssociatedActionProperty() != null) {
-                    FactAssociatedAction factAssociatedActionDef = factActionRepository.findById(action.getFactAssociatedActionProperty().getId())
-                            .orElseThrow(() -> new IllegalArgumentException("Unknown action definition ID: " + action.getFactAssociatedActionProperty().getId()));
-                    if (ruleFact != null && !factAssociatedActionDef.getFact().getId().equals(ruleFact.getId())) {
-                        throw new IllegalArgumentException("Action property '" + factAssociatedActionDef.getKey() + "' does not belong to domain '" + ruleFact.getName() + "'");
+                if (action.getAction() != null) {
+                    AssociatedAction associatedActionDef = associatedActionRepository.findById(action.getAction().getId())
+                            .orElseThrow(() -> new IllegalArgumentException("Unknown action definition ID: " + action.getAction().getId()));
+                    if (ruleFact != null && !associatedActionDef.getFact().getId().equals(ruleFact.getId())) {
+                        throw new IllegalArgumentException("Action property '" + associatedActionDef.getKey() + "' does not belong to domain '" + ruleFact.getName() + "'");
                     }
-                    action.setFactAssociatedActionProperty(factAssociatedActionDef);
+                    action.setAction(associatedActionDef);
                 }
             }
         }

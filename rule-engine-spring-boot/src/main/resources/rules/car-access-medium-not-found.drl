@@ -17,7 +17,7 @@ when
         properties["carAccess"] == true
     )
 then
-    outputs.put("factAssociatedAction", "INTERCOM");
+    outputs.put("associatedAction", "INTERCOM");
     System.out.println("Unknown LPN → operator handling");
 end
 
@@ -37,7 +37,7 @@ when
         )
     )
 then
-    outputs.put("factAssociatedAction", "OPEN_BARRIER");
+    outputs.put("associatedAction", "OPEN_BARRIER");
     outputs.put("financialAction", "CREATE_SHOWUP_PRODUCT");
     System.out.println("No fuzzy match → open barrier + showup");
 end
@@ -56,7 +56,7 @@ when
         properties["fuzzyMatchFound"] == true
     )
 then
-    outputs.put("factAssociatedAction", "OPEN_BARRIER");
+    outputs.put("associatedAction", "OPEN_BARRIER");
     outputs.put("financialAction", "REGISTERED_ENTRY");
     System.out.println("Fuzzy match → registered entry");
 end

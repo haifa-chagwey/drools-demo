@@ -1,10 +1,13 @@
 package com.haifachagwey.ruleengine.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Data
@@ -19,8 +22,9 @@ public class RuleCondition {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "fact_property_id")
-    private FactProperty factProperty;
+    @JoinColumn(name = "attribute_id")
+    @JsonBackReference
+    private FactAttribute attribute;
 
     private String operator;
 
@@ -28,7 +32,24 @@ public class RuleCondition {
 
     @ManyToOne
     @JoinColumn(name = "rule_id")
+    @JsonBackReference
     private Rule rule;
+
+    private LocalDateTime createdAt;
+    private LocalDateTime modifiedAt;
+    private String createdBy;
+    private String modifiedBy;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        modifiedAt = createdAt;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        modifiedAt = LocalDateTime.now();
+    }
 
 
 

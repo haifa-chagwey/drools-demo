@@ -17,7 +17,7 @@ when
         facts["carAccess"] == true
     )
 then
-    outputs.put("factAssociatedAction", "INTERCOM");
+    outputs.put("associatedAction", "INTERCOM");
     System.out.println("Out of profile → operator");
 end
 
@@ -32,7 +32,7 @@ when
         facts["graceTimeViolated"] == true
     )
 then
-    outputs.put("factAssociatedAction", "OPEN_BARRIER");
+    outputs.put("associatedAction", "OPEN_BARRIER");
     outputs.put("financialAction", "OUT_OF_PROFILE_ENTRY");
     System.out.println("Grace time violated → allow entry with special product");
 end

@@ -1,12 +1,13 @@
 package com.haifachagwey.ruleengine.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -14,27 +15,38 @@ import java.util.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "fact")
-public class Fact {
+@Table(name = "associated_action")
+public class AssociatedAction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Column(unique = true, nullable = false)
-    private String name;
+    private String key;
 
-    private String description;
+    @Column(nullable = false)
+    private String label;
 
-    @OneToMany(mappedBy = "fact", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private AttributeType type;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "fact_id")
+    @JsonBackReference
+    private Fact fact;
+
+    @OneToMany(mappedBy = "action", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     @Builder.Default
-    private Set<FactAttribute> attributes = new HashSet<>();
+    private Set<ActionOption> options = new HashSet<>();
 
-    @OneToMany(mappedBy = "fact", cascade = CascadeType.ALL, orphanRemoval = true)
+
+    @OneToMany(mappedBy = "action", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     @Builder.Default
-    private Set<AssociatedAction> associatedActions = new HashSet<>();
+    private Set<RuleAction> ruleActions = new HashSet<>();
 
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
@@ -55,9 +67,9 @@ public class Fact {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Fact)) return false;
-        Fact fact = (Fact) o;
-        return id != null && id.equals(fact.id);
+        if (!(o instanceof AssociatedAction)) return false;
+        AssociatedAction associatedAction = (AssociatedAction) o;
+        return id != null && id.equals(associatedAction.id);
     }
 
     @Override

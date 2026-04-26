@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
-
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -14,8 +14,8 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "fact_property")
-public class FactProperty {
+@Table(name = "fact_attribute")
+public class FactAttribute {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,25 +29,45 @@ public class FactProperty {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private FactPropertyType type;
-
-    private String description;
+    private AttributeType type;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fact_id")
     @JsonBackReference
     private Fact fact;
 
-    @OneToMany(mappedBy = "factProperty", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "attribute", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     @Builder.Default
-    private Set<FactPropertyValue> allowedValues = new HashSet<>();
+    private Set<AttributeOption> options = new HashSet<>();
+
+    @OneToMany(mappedBy = "attribute", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    @Builder.Default
+    private  Set<RuleCondition> ruleConditions = new HashSet<>();
+
+
+    private LocalDateTime createdAt;
+    private LocalDateTime modifiedAt;
+    private String createdBy;
+    private String modifiedBy;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        modifiedAt = createdAt;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        modifiedAt = LocalDateTime.now();
+    }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof FactProperty)) return false;
-        FactProperty that = (FactProperty) o;
+        if (!(o instanceof FactAttribute)) return false;
+        FactAttribute that = (FactAttribute) o;
         return id != null && id.equals(that.id);
     }
 

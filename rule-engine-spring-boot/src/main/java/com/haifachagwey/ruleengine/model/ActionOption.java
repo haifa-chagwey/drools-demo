@@ -10,8 +10,8 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "action_allowed_value")
-public class FactAssociatedActionValue {
+@Table(name = "action_option")
+public class ActionOption {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,13 +25,13 @@ public class FactAssociatedActionValue {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "action_id")
     @JsonBackReference
-    private FactAssociatedAction factAssociatedAction;
+    private AssociatedAction action;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof FactAssociatedActionValue)) return false;
-        FactAssociatedActionValue that = (FactAssociatedActionValue) o;
+        if (!(o instanceof ActionOption)) return false;
+        ActionOption that = (ActionOption) o;
         return id != null && id.equals(that.id);
     }
 

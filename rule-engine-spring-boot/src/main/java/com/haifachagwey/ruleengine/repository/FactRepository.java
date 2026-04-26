@@ -9,14 +9,14 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface FactTypeRepository extends JpaRepository<Fact, Integer> {
+public interface FactRepository extends JpaRepository<Fact, Integer> {
     Optional<Fact> findByName(String name);
 
     @Override
-    @EntityGraph(attributePaths = {"properties", "properties.allowedValues", "associatedActions", "associatedActions.allowedValues"})
+//    @EntityGraph(attributePaths = {"properties", "properties.allowedValues", "associatedActions", "associatedActions.allowedValues"})
     List<Fact> findAll();
 
     @Override
-    @EntityGraph(attributePaths = {"properties", "properties.allowedValues", "associatedActions", "associatedActions.allowedValues"})
+//    @EntityGraph(attributePaths = {"properties", "properties.allowedValues", "associatedActions", "associatedActions.allowedValues"})
     Optional<Fact> findById(Integer id);
 }

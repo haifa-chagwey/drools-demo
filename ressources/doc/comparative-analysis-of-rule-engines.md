@@ -29,12 +29,12 @@ This report evaluates five rule engine technologies to determine the optimal cho
     ```java
     // 1. Logic is stored as strings in your SQL database
     String condition = "type == 'Electric' && duration > 2";
-    String factAssociatedAction = "output.put('fee', 1.5);";
+    String associatedAction = "output.put('fee', 1.5);";
 
     // 2. The engine loads these strings at runtime
     Rule rule = new RuleBuilder()
         .when(new MVELCondition(condition))
-        .then(new MVELAction(factAssociatedAction))
+        .then(new MVELAction(associatedAction))
         .build();
     ```
 *   **Pros:** Minimal memory footprint; loads logic directly from SQL; easy for developers to maintain.

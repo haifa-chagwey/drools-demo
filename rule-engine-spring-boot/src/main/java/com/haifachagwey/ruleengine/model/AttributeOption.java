@@ -7,12 +7,12 @@ import lombok.*;
 @Entity
 @Getter
 @Setter
-@ToString(exclude = "factProperty")
+@ToString(exclude = "attribute")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "fact_property_allowed_value")
-public class FactPropertyValue {
+@Table(name = "attribute_option")
+public class AttributeOption {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,15 +24,14 @@ public class FactPropertyValue {
     private String label;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fact_property_id")
+    @JoinColumn(name = "attribute_id")
     @JsonBackReference
-    private FactProperty factProperty;
+    private FactAttribute attribute;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof FactPropertyValue)) return false;
-        FactPropertyValue that = (FactPropertyValue) o;
+        if (!(o instanceof AttributeOption that)) return false;
         return id != null && id.equals(that.id);
     }
 

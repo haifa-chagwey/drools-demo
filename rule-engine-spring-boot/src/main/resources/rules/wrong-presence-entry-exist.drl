@@ -19,7 +19,7 @@ when
         facts["durationSinceLastEntry"] >= configs["entryToleranceDuration"]
     )
 then
-    outputs.put("factAssociatedAction", "CREATE_VIRTUAL_ENTRY");
+    outputs.put("associatedAction", "CREATE_VIRTUAL_ENTRY");
     outputs.put("notification", "SYSTEM_NOTIFICATION");
     outputs.put("nextStep", "PROCEED");
     System.out.println("Employee wrong presence tolerated (>24h)");
@@ -38,7 +38,7 @@ when
     )
 then
     outputs.put("notification", "SYSTEM_NOTIFICATION");
-    outputs.put("factAssociatedAction", "INTERCOM");
+    outputs.put("associatedAction", "INTERCOM");
     System.out.println("Employee wrong presence → notify + intercom");
 end
 
@@ -54,7 +54,7 @@ when
         facts["wrongPresence"] == true
     )
 then
-    outputs.put("factAssociatedAction", "CLOSE_PREVIOUS_TRANSACTION");
+    outputs.put("associatedAction", "CLOSE_PREVIOUS_TRANSACTION");
     outputs.put("nextStep", "PROCEED");
     System.out.println("Short term wrong presence → close previous transaction");
 end
@@ -70,7 +70,7 @@ when
         facts["wrongPresence"] == true
     )
 then
-    outputs.put("factAssociatedAction", "CREATE_VIRTUAL_ENTRY");
+    outputs.put("associatedAction", "CREATE_VIRTUAL_ENTRY");
     outputs.put("notification", "SYSTEM_NOTIFICATION");
     outputs.put("nextStep", "PROCEED");
     System.out.println("Exit wrong presence → create virtual entry + notify");
