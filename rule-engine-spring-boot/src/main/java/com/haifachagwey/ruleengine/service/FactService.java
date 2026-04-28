@@ -1,56 +1,56 @@
 package com.haifachagwey.ruleengine.service;
 
-import com.haifachagwey.ruleengine.model.*;
+import com.haifachagwey.ruleengine.dto.FactDTO;
+import com.haifachagwey.ruleengine.exception.ResourceNotFoundException;
+import com.haifachagwey.ruleengine.mapper.FactMapper;
+import com.haifachagwey.ruleengine.model.Fact;
 import com.haifachagwey.ruleengine.repository.FactRepository;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class FactService {
 
     private final FactRepository factRepository;
+    private final FactMapper factMapper;
+    private final RuleService ruleService;
 
-    public FactService(FactRepository factRepository) {
-        this.factRepository = factRepository;
-    }
 
 
     @Transactional
-    public List<Fact> getAllFacts() {
-        return factRepository.findAll();
+    public List<FactDTO> getAllFacts() {
+        return factRepository.findAll().stream()
+                .map(factMapper::toDTO)
+                .toList();
     }
 
     @Transactional
-    public Optional<Fact> getFactById(Integer id) {
-        return factRepository.findById(id);
+    public FactDTO getFactById(Integer id) {
+        return factRepository.findById(id)
+                .map(factMapper::toDTO)
+                .orElseThrow(() -> new ResourceNotFoundException("Fact not found with id: " + id));
     }
 
-
-
-    public Fact saveFact(Fact fact) {
-        if (fact.getAttributes() != null) {
-            fact.getAttributes().forEach(att -> {
-                att.setFact(fact);
-                if (att.getOptions() != null) {
-                    att.getOptions().forEach(option -> option.setAttribute(att));
-                }
-            });
-        }
-        if (fact.getAssociatedActions() != null) {
-            fact.getAssociatedActions().forEach(assac -> {
-                assac.setFact(fact);
-                if (assac.getOptions() != null) {
-                    assac.getOptions().forEach(option -> option.setAction(assac));
-                }
-            });
-        }
-        return factRepository.save(fact);
+    @Transactional // added
+    public FactDTO saveFact(FactDTO factDTO) {
+        Fact fact = factMapper.toEntity(factDTO); // mapper already links children to parents
+        Fact saved = factRepository.save(fact);
+        ruleService.reloadRules();
+        return factMapper.toDTO(saved);
     }
 
+    @Transactional // added
     public void deleteFact(Integer id) {
+        if (!factRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Fact not found with id: " + id);
+        }
         factRepository.deleteById(id);
+        ruleService.reloadRules();
     }
+
 }

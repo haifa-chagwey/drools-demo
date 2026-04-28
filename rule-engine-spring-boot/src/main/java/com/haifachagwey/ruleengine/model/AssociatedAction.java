@@ -1,12 +1,15 @@
 package com.haifachagwey.ruleengine.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -28,52 +31,31 @@ public class AssociatedAction {
     @Column(nullable = false)
     private String label;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private AttributeType type;
+
+    /*
+     * Many-to-One relationship with Fact
+     */
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fact_id")
-    @JsonBackReference
+    @JsonIgnore
     private Fact fact;
 
-    @OneToMany(mappedBy = "action", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    @Builder.Default
-    private Set<ActionOption> options = new HashSet<>();
-
+    /*
+     * One-to-Many relationship with ActionOption
+     */
 
     @OneToMany(mappedBy = "action", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
     @Builder.Default
-    private Set<RuleAction> ruleActions = new HashSet<>();
+    private List<ActionOption> options = new java.util.ArrayList<>();
 
-    private LocalDateTime createdAt;
-    private LocalDateTime modifiedAt;
-    private String createdBy;
-    private String modifiedBy;
+    /*
+     * One-to-Many relationship with RuleAction
+     */
 
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        modifiedAt = createdAt;
-    }
+    @OneToMany(mappedBy = "action", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    @JsonIgnore
+    private List<RuleAction> ruleActions = new ArrayList<>();
 
-    @PreUpdate
-    protected void onUpdate() {
-        modifiedAt = LocalDateTime.now();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof AssociatedAction)) return false;
-        AssociatedAction associatedAction = (AssociatedAction) o;
-        return id != null && id.equals(associatedAction.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
 }

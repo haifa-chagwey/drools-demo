@@ -1,5 +1,6 @@
 package com.haifachagwey.ruleengine.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -27,7 +28,7 @@ public class Rule {
 
     private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "fact_id")
     private Fact fact;
 
@@ -36,12 +37,10 @@ public class Rule {
 
     @OneToMany(mappedBy = "rule", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    @JsonManagedReference
     private List<RuleCondition> conditions = new ArrayList<>();
 
     @OneToMany(mappedBy = "rule", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    @JsonManagedReference
     private List<RuleAction> actions = new ArrayList<>();
 
     private LocalDateTime createdAt;

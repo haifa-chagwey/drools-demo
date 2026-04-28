@@ -1,6 +1,7 @@
 package com.haifachagwey.ruleengine.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,7 +25,7 @@ public class ActionOption {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "action_id")
-    @JsonBackReference
+    @JsonIgnore
     private AssociatedAction action;
 
     @Override

@@ -3,7 +3,6 @@ package com.haifachagwey.ruleengine.service;
 import com.haifachagwey.ruleengine.model.*;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -16,49 +15,45 @@ public class RuleDrlCompiler {
         if (rule.getFact() != null) {
             drl.append("// Domain: ").append(rule.getFact().getName()).append("\n");
         }
-        drl.append("import com.haifachagwey.ruleengine.model.GlobalFact;\n");
+        drl.append("import com.haifachagwey.ruleengine.model.Fact;\n");
         drl.append("global java.util.Map outputs;\n");
         drl.append("global java.util.Map configs;\n");
         drl.append("dialect \"mvel\"\n\n");
 
-        drl.append("rule \"").append(rule.getName()).append("\"\n");
+        drl.append("rule \"").append(rule.getName()).append("_").append(rule.getId()).append("\"\n");
+
+//        Conditions
         drl.append("when\n");
-        drl.append("    $f : GlobalFact(");
+
+        drl.append("    $f : Fact(");
+        drl.append(rule.getFact() != null ? "name==" + "\"" + rule.getFact().getName()+ "\"" : "name==null");
+        drl.append("&&");
 
         if (rule.getConditions() != null && !rule.getConditions().isEmpty()) {
-            List<String> parts = new ArrayList<>();
-            for (RuleCondition condition : rule.getConditions()) {
-                    parts.add(compileCondition(condition));
-            }
-            if (parts.isEmpty()) {
-                drl.append("eval(true)");
-            } else {
-                drl.append(String.join(" && ", parts));
-            }
+            List<String> parts = rule.getConditions().stream()
+                    .map(this::compileCondition)
+                    .toList();
+            drl.append(String.join(" && ", parts));
         } else {
             drl.append("eval(true)");
         }
-
         drl.append(")\n");
-        drl.append("then\n");
 
+//        Actions
+        drl.append("then\n");
         if (rule.getActions() != null) {
             for (RuleAction action : rule.getActions()) {
-                    String key = "unknown";
-                    AttributeType valueType = AttributeType.STRING;
-                    if (action.getAction() != null) {
-                        key = action.getAction().getKey();
-                        valueType = action.getAction().getType();
-                    }
-//                    else if (action.getOutputKey() != null) {
-//                        key = action.getOutputKey();
-//                    }
-                    drl.append("    outputs.put(\"")
-                       .append(key)
-                       .append("\", ")
-                       .append(formatConstant(action.getValue(), valueType))
-                       .append(");\n");
+                String key = "unknown";
+                if (action.getAction() != null) {
+                    key = action.getAction().getKey();
+                }
 
+//                outputs.put(key, value);
+                drl.append("    outputs.put(\"")
+                   .append(key)
+                   .append("\", ")
+                   .append(action.getValue())
+                   .append(");\n");
             }
         }
 
@@ -68,25 +63,26 @@ public class RuleDrlCompiler {
 
 
     private String compileCondition(RuleCondition condition) {
-        String leftHandSide;
-        AttributeType type = AttributeType.STRING;
-        if (condition.getAttribute() != null) {
-            leftHandSide = "properties[\"" + condition.getAttribute().getKey() + "\"]";
-            type = condition.getAttribute().getType();
-        } else {
+        if (condition.getAttribute() == null) {
             return "eval(true)";
         }
 
-        String operator = condition.getOperator();
-        if (operator == null) operator = "==";
+        String leftHandSide = "attributes[\"" + condition.getAttribute().getKey() + "\"]";
+        AttributeType type = condition.getAttribute().getType();
 
-        String rightHandSide;
-        if (condition.getValue() != null && condition.getValue().startsWith("config:")) {
-            String configKey = condition.getValue().substring("config:".length());
-            rightHandSide = "configs[\"" + configKey + "\"]";
-        } else {
-            rightHandSide = formatConstant(condition.getValue(), type);
+        String operator;
+        switch (condition.getOperator()) {
+            case "EQUAL" -> operator = "==";
+            case "NOT_EQUAL" -> operator = "!=";
+            case "GREATER_THAN" -> operator = ">";
+            case "LESS_THAN" -> operator = "<";
+            case "GREATER_OR_EQUAL" -> operator = ">=";
+            case "LESS_OR_EQUAL" -> operator = "<=";
+            default -> throw new IllegalArgumentException("Unsupported operator: " + condition.getOperator());
         }
+
+        String rightHandSide = formatConstant(condition.getValue(), type);
+
 
         return leftHandSide + " " + operator + " " + rightHandSide;
     }
@@ -94,12 +90,11 @@ public class RuleDrlCompiler {
 
     private String formatConstant(String value, AttributeType valueType) {
         if (value == null) return "null";
-        if (valueType == AttributeType.BOOLEAN) {
-            return value.toLowerCase();
-        }
-        if (valueType == AttributeType.NUMBER) {
-            return value;
-        }
-        return "\"" + value.replace("\"", "\\\"") + "\"";
+
+        return switch (valueType) {
+            case BOOLEAN -> value.toLowerCase();
+            case NUMBER -> value;
+            default -> "\"" + value.replace("\"", "\\\"") + "\"";
+        };
     }
 }

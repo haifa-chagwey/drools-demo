@@ -1,6 +1,7 @@
 package com.haifachagwey.ruleengine.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -25,7 +26,7 @@ public class AttributeOption {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "attribute_id")
-    @JsonBackReference
+    @JsonIgnore
     private FactAttribute attribute;
 
     @Override

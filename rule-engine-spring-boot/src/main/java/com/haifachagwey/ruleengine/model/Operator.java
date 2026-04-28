@@ -7,4 +7,9 @@ public enum Operator {
     LESS_THAN_OR_EQUAL,
     EQUALS,
     NOT_EQUALS;
+
+    public String getOperator() {
+        return this.name();
+    }
+
 }

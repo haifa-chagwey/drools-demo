@@ -1,5 +1,6 @@
 package com.haifachagwey.ruleengine.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
@@ -27,14 +28,17 @@ public class Fact {
     private String description;
 
     @OneToMany(mappedBy = "fact", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
     @Builder.Default
-    private Set<FactAttribute> attributes = new HashSet<>();
+    private List<FactAttribute> attributes = new ArrayList<>();
 
     @OneToMany(mappedBy = "fact", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
     @Builder.Default
-    private Set<AssociatedAction> associatedActions = new HashSet<>();
+    private List<AssociatedAction> associatedActions = new ArrayList<>();
+
+    @OneToMany(mappedBy = "fact", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    @JsonIgnore
+    private List<Rule> rules = new ArrayList<>();
 
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
@@ -52,16 +56,4 @@ public class Fact {
         modifiedAt = LocalDateTime.now();
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Fact)) return false;
-        Fact fact = (Fact) o;
-        return id != null && id.equals(fact.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
 }

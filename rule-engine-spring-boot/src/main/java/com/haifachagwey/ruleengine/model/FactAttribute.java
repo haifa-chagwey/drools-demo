@@ -1,11 +1,14 @@
 package com.haifachagwey.ruleengine.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -33,46 +36,17 @@ public class FactAttribute {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fact_id")
-    @JsonBackReference
+    @JsonIgnore
     private Fact fact;
 
     @OneToMany(mappedBy = "attribute", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
     @Builder.Default
-    private Set<AttributeOption> options = new HashSet<>();
+    private List<AttributeOption> options = new ArrayList<>();
 
     @OneToMany(mappedBy = "attribute", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
     @Builder.Default
-    private  Set<RuleCondition> ruleConditions = new HashSet<>();
+    @JsonIgnore
+    private List<RuleCondition> ruleConditions = new ArrayList<>();
 
 
-    private LocalDateTime createdAt;
-    private LocalDateTime modifiedAt;
-    private String createdBy;
-    private String modifiedBy;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        modifiedAt = createdAt;
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        modifiedAt = LocalDateTime.now();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof FactAttribute)) return false;
-        FactAttribute that = (FactAttribute) o;
-        return id != null && id.equals(that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
 }
